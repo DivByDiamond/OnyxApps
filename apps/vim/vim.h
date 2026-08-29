@@ -1,5 +1,5 @@
 /*
- * vim.h — shared state and API for the Onyx modal editor.
+ * vim.h - shared state and API for the Onyx modal editor.
  * Split of the original single-file vim.c into modules; see README.md
  * for the full key-binding reference and the module map.
  */
@@ -46,9 +46,9 @@
 /* ── Registers / undo ──────────────────────────────────────────────── */
 #define UNDO_MAX 128
 
-#define UNDO_DEL_TEXT 0    /* text deleted at pos — undo re-inserts it */
-#define UNDO_INS_TEXT 1    /* text inserted at pos — undo deletes it */
-#define UNDO_DEL_LINE 2    /* whole line removed — undo re-inserts line */
+#define UNDO_DEL_TEXT 0    /* text deleted at pos - undo re-inserts it */
+#define UNDO_INS_TEXT 1    /* text inserted at pos - undo deletes it */
+#define UNDO_DEL_LINE 2    /* whole line removed - undo re-inserts line */
 
 typedef struct {
     int pos_line, pos_col;   /* where the change started */
@@ -140,7 +140,7 @@ int  is_word(int c);
 void motion_word_forward(void);
 void motion_word_back(void);
 void motion_word_end(void);
-void bracket_match(void);   /* % — jump to matching bracket */
+void bracket_match(void);   /* % - jump to matching bracket */
 int  find_str(const char *pat, int from_line, int from_col,
               int *out_line, int *out_col);
 int  do_find_char(int dir, int til, int c);

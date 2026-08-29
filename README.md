@@ -1,34 +1,79 @@
-# OnyxApps — userland applications for OnyxOS
+[![OnyxApps CI](https://github.com/DivByDiamond/OnyxApps/actions/workflows/ci.yml/badge.svg)](https://github.com/DivByDiamond/OnyxApps/actions/workflows/ci.yml)
 
-Collection of optional userland programs for OnyxOS, written in C and
-compiled to `.onx` executables with [OnyxCC](https://github.com/DivByDiamond/OnyxCompiller).
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-OnyxOS%20%7C%20RISC--V%2064--bit-green" alt="RISC-V 64">
+  <img src="https://img.shields.io/badge/language-C99-orange" alt="C99">
+  <img src="https://img.shields.io/badge/compiler-OnyxCC-yellow" alt="OnyxCC">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-red" alt="GPL-3.0">
+</p>
 
-**One repository for all apps**: every app is a self-contained directory
-under `apps/`; the CI builds all of them with the same pinned compiler and
-publishes `.onx` artifacts — no per-app repo / artifact-sync overhead.
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  OnyxApps (this repo — optional userland)                │
-│   apps/vim   apps/btop   apps/...                        │
-├──────────────────────────────────────────────────────────┤
-│  OnyxCompiller (onyxcc, libonyxc)   ← build toolchain    │
-│  OnyxShell / OnyxKernel / OnyxBoot  ← system (separate)  │
-│  OnyxOS (image orchestrator)        ← bundles everything │
-└──────────────────────────────────────────────────────────┘
-```
+<p align="center">
+<pre class="not-prose" style="text-align:center;font-family:monospace;">
+    ███████
+  ███▒▒▒▒▒███
+ ███     ▒▒███ ████████   █████ ████ █████ █████
+▒███      ▒███▒▒███▒▒███ ▒▒███ ▒███ ▒▒███ ▒▒███
+▒███      ▒███ ▒███ ▒███  ▒███ ▒███  ▒▒▒█████▒
+▒▒███     ███  ▒███ ▒███  ▒███ ▒███   ███▒▒▒███
+ ▒▒▒███████▒   ████ █████ ▒▒███████  █████ █████
+   ▒▒▒▒▒▒▒    ▒▒▒▒ ▒▒▒▒▒   ▒▒▒▒▒███ ▒▒▒▒▒ ▒▒▒▒▒
+                           ███ ▒███
+                          ▒▒██████
+                           ▒▒▒▒▒▒
+ ████████
+██▒▒▒▒▒▒███ ████ █████  █████████  █████████
+███▒▒▒▒▒███▒▒███ ▒▒███ ▒██▒▒▒▒▒▒███▒▒███▒▒▒▒███
+███████████ ▒███  ▒███ ▒██▒▒▒▒▒▒███▒██████████
+██▒▒▒▒▒▒███ █████ █████▒██▒▒▒▒▒▒███ ▒▒███████
+██▒▒▒▒▒▒███▒███▒▒▒ ▒███ ▒██▒▒▒▒▒▒███  ████████
+███▒▒▒▒▒███▒███▒▒▒ ▒███ ███████████▒███▒▒▒▒▒
+███▒▒▒▒▒███▒███▒▒▒ ▒███ ▒███▒▒▒▒▒▒ ▒███▒▒▒▒▒
+ ▒▒███████▒ ▒▒███████▒  ▒▒█████████  ▒▒███████
+  ▒▒▒▒▒▒▒    ▒▒▒▒▒▒▒    ▒▒▒▒▒▒▒▒▒    ▒▒▒▒▒▒▒
+</pre>
+</p>
+
+<p align="center"><em>Optional userland applications for OnyxOS, written in C99</em></p>
+
+----
+
+OnyxApps is the single repository for every optional userspace program of
+[OnyxOS](https://github.com/DivByDiamond/OnyxOS), written in C99 and compiled
+to `.onx` executables by the project's own self-hosting compiler
+([OnyxCC](https://github.com/DivByDiamond/OnyxCompiller)) against `libonyxc`
+(stdio / termios / string / stdlib).
+
+One repo for all apps: every program is a self-contained directory under
+`apps/`, the CI builds all of them with the same pinned compiler and
+publishes `.onx` artifacts, so there is no per-app repository and no
+artifact-sync overhead. The system components stay in their own repos:
+[OnyxKernel](https://github.com/DivByDiamond/OnyxKernel),
+[OnyxBoot](https://github.com/DivByDiamond/OnyxBoot),
+[OnyxShell](https://github.com/DivByDiamond/OnyxShell),
+[OnyxCompiller](https://github.com/DivByDiamond/OnyxCompiller) and the
+[OnyxOS](https://github.com/DivByDiamond/OnyxOS) image orchestrator.
+
+----
+
+## Key Features
+
+- **One repo, many apps** - a new program is a directory, not a repository
+- **OnyxCC pipeline** - `onyxcc` links `libonyxc` automatically, no extra flags
+- **Enforced layout** - max 4 files per folder, max 200 lines per file, KISS/DRY
+- **CI-built artifacts** - every push rebuilds all apps and uploads `.onx` files
 
 ## Apps
 
 | App | Source | Description |
 |-----|--------|-------------|
-| `vim` | [apps/vim](apps/vim) | Modal text editor (vim-inspired), see bindings below |
+| **vim** | [apps/vim](apps/vim) | Modal text editor (vim-inspired), see [Vim](#vim) below |
 
 ## Layout rules (project-wide)
 
-- **max 4 files per folder** — one folder = one subsystem;
-- **max 200 lines per file** — one responsibility per file;
-- KISS / DRY: shared logic lives in exactly one place.
+- **max 4 files per folder** - one folder = one subsystem
+- **max 200 lines per file** - one responsibility per file
+- **KISS / DRY** - shared logic lives in exactly one place
 
 Reference structure (`apps/vim`):
 
@@ -58,89 +103,118 @@ make vim                              # build one app
 ONYXCC=/path/to/onyxcc make           # custom compiler path
 ```
 
-Each `apps/<name>/*.c` set compiles to `build/<name>.onx`; run it on
+Each `apps/<name>/` tree compiles to `build/<name>.onx`; run it on
 OnyxOS as `vim [file]`.
 
 ## Adding an app
 
 1. `mkdir apps/myapp` and put your `*.c` files there (self-contained;
-   `onyxcc` links libonyxc automatically, no extra flags needed).
-2. Append it to `APPS` in the Makefile if it needs custom flags —
-   the wildcard build covers plain apps automatically.
-3. CI picks it up: syntax-check + real onyxcc build + `.onx` artifact.
+   `onyxcc` links libonyxc automatically, no extra flags needed)
+2. CI picks it up automatically: syntax-check + real onyxcc build + `.onx`
+   artifact. Add the app to the `matrix` lists in `.github/workflows/ci.yml`
 
 ## CI
 
-- **syntax-check** — `gcc -fsyntax-only` against `libonyxc` headers
-  (fast feedback, no toolchain build).
-- **build** — builds OnyxCC from source, compiles every app into `.onx`,
-  validates the `ONX1` magic, uploads artifacts.
+- **syntax-check** - `gcc -fsyntax-only` against `libonyxc` headers
+  (fast feedback, no toolchain build)
+- **build** - builds OnyxCC from source, compiles every app into `.onx`,
+  validates the `ONX1` magic, uploads artifacts
 
-## Roadmap / known quirks (inherited from the original vim.c)
+----
 
-- `ZZ`/`ZQ` — the save-and-quit block is unreachable in the original
+# Vim
+
+Modal text editor inspired by Vim. Implements the familiar Vim editing
+model: modes, registers, counts, search, substitution and a `:` command
+line.
+
+## Modes
+
+| Mode | Enter | Indicator |
+|------|-------|-----------|
+| NORMAL | Esc | `[NORMAL]` |
+| INSERT | `i a I A o O` | `[INSERT]` |
+| VISUAL / V-LINE | `v` / `V` | `[VISUAL]` / `[V-LINE]` |
+| COMMAND | `:` | `:cmd` at bottom |
+| SEARCH | `/` `?` | `/pat` at bottom |
+
+## Key bindings
+
+### NORMAL mode
+
+- **Motions** - `h j k l`, word motions `w b e`, `0 ^ $`, `gg G`, `{ }`,
+  `f/F/t/T` with `; ,` repeat, `%` bracket matching, `zz` center,
+  `Ctrl+f/b/d/u` paging, `gg` = file top, `G` / `N G` = line N
+- **Editing operators** - `x X dd dw d$ d0 dG dj dk D J cc cw c$ C S s
+  r ~ >> <<` (with counts: `3dd`, `2x`)
+- **Registers** - yank/paste: `yy yw y$ yj yk`, `p P` (linewise and charwise)
+- **Undo / redo** - `u`, `Ctrl+r` (charwise, linewise and inserted text)
+- **Search** - `/pat` forward, `?pat` backward, `n` repeat, `*` word under cursor
+- **Visual mode** - charwise (`v`) and linewise (`V`): select, delete,
+  yank, indent, toggle case, `ggVG` select all
+
+### INSERT mode
+
+Printable characters, Enter, Backspace, Tab (4 spaces), Esc to NORMAL.
+
+### COMMAND (`:`) mode
+
+- `:w [file]` write - `:q` quit (fails if modified) - `:wq` / `:x` write+quit -
+  `:q!` force quit
+- `:e file` open file - `:enew` new empty buffer - `:r file` insert file below
+- `:set nu / nonu` line numbers - `:set rnu / nornu` relative numbers
+- `:$` / `:1` / `:N` go to line N or end
+- `:s/old/new/[g]` substitute (current line) - `:%s/old/new/[g]` whole file
+- `:h` help - `:ver` version
+- `ZZ` = `:wq`, `ZQ` = `:q!`
+
+## Installing into OnyxOS
+
+1. Build the boot disk as usual (`scripts/build-all.sh` in OnyxOS)
+2. Take `vim.onx` from the CI artifacts (or `make vim`) and add a line to
+   the disk manifest:
+   ```
+   /path/to/vim.onx -> /bin/vim
+   ```
+3. Rebuild the image: `bash scripts/mk-onyxfs-disk.sh`
+4. In the system: `run /bin/vim file.txt`
+
+## Testing
+
+Verified with integration runs through the `onx-run` emulator
+(compile - run - compare result):
+
+- motion `hjkl w b $ gg G`, counts `3x 2dd 5j`
+- edits `x dd dw D J A i o O ~ >> <<`
+- registers `yy p P` (linewise and charwise)
+- undo/redo `u Ctrl+r`
+- ex commands `:w :q :wq :q! :e :r :N :$ :set nu :s/// :%s///g`
+- search `/pat n *`
+- visual mode `Vjd`, `Vy`
+
+Requires a kernel with an ANSI/VT100 console and termios
+(TCGETS/TCSETS, TIOCGWINSZ) - provided by OnyxKernel v0.4+.
+
+## Known quirks
+
+- `ZZ`/`ZQ` - the save-and-quit block is unreachable in the original
   dispatcher (the `Z` case returns first and the `g_pending` block clears
-  the flag). Preserved verbatim during the split; fix is pending.
-- `.` (repeat last change) is a stub message.
-- Relative line numbers (`:set rnu`) render but the ruler is shared with
-  absolute numbers.
-- `N` (reverse search repeat) prints a hint; use `?pattern` instead.
+  the flag). Preserved verbatim during the split; fix is pending
+- `.` (repeat last change) is a stub message
+- `N` (reverse search repeat) prints a hint; use `?pattern` instead
 
----
+----
 
-vim.c — OnyxOS modal text editor (vim-inspired), single file.
+## Related Projects
 
-Standard vim binds implemented:
+| Project | Description |
+|---------|-------------|
+| [OnyxOS](https://github.com/DivByDiamond/OnyxOS) | RISC-V operating system (kernel + shell + bootloader + compiler) |
+| [OnyxKernel](https://github.com/DivByDiamond/OnyxKernel) | RISC-V 64-bit kernel for OnyxOS |
+| [OnyxShell](https://github.com/DivByDiamond/OnyxShell) | POSIX-like shell for OnyxOS |
+| [OnyxBoot](https://github.com/DivByDiamond/OnyxBoot) | RISC-V bootloader for OnyxOS |
+| [OnyxCompiller](https://github.com/DivByDiamond/OnyxCompiller) | Self-hosting C compiler used to build the apps |
 
-NORMAL mode:
-h j k l        move cursor          w b e     word motions
-0 ^ $          line start/first-nonspace/end
-gg G           file top/bottom      { }       paragraph motions
-f<c> F<c> t<c> T<c>  find char on line (with ; and , repeat)
-x X            delete char under/before
-dd dw d$ d0 dG dgg dj dk   deletes (+ count: 3dd)
-cc cw c$ c0    change (delete + insert)
-D C            delete to EOL / change to EOL
-S s            substitute line / char
-yy yw y$ yj yk yank   (+ count)
-p P            paste after/before (linewise + charwise)
-r<c>           replace char         J         join lines
-u U            undo, undo-line      Ctrl+r    redo
-.              repeat last change
->> <<          indent/outdent line
-~              toggle case of char
-i a I A o O    enter INSERT (before/after/line-start/line-end/
-open-below/open-above)
-v V            VISUAL char/line mode: move extends, d/x/y delete/yank,
->/< indent, ~ case-toggle, Esc exit
-/pat<CR>       search forward       ?pat<CR>  search backward
-n N            repeat search        *         search word under cursor
-ggVG           select all (via visual G)
-zz             center cursor line (scroll)
-Ctrl+f Ctrl+b  page down/up         Ctrl+d Ctrl+u  half-page
-%              bracket match
-ZZ             :wq     ZQ           :q!
+----
 
-INSERT mode: printable, Enter, Backspace, Tab(→4 sp), Esc → NORMAL.
-
-COMMAND (:) mode:
-:w [file]      write            :q         quit (fails if modified)
-:wq / :x       write+quit       :q!        force quit
-:e file        open file        :enew      new empty buffer
-:r file        insert file below cursor
-:set nu / :set nonu     line numbers
-:set rnu / :set nornu   relative numbers
-:$ :1 :N       go to line N / end
-:s/old/new/[g] substitute (current line, g = all occurrences)
-:%s/old/new/[g] substitute whole file
-:h             help             :ver       version
-
-Run:    vim [file]
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-#include <fcntl.h>
+Licensed under GPL-3.0-or-later.

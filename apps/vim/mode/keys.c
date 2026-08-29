@@ -1,4 +1,4 @@
-/* keys.c — NORMAL-mode dispatcher: pending-mode glue, counts and
+/* keys.c - NORMAL-mode dispatcher: pending-mode glue, counts and
  * delegation to motion/edit handlers.
  * NOTE: the trailing ZZ/ZQ block below is unreachable in the original
  * single-file version (case 'Z' returns first, and the g_pending block

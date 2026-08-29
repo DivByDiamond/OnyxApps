@@ -1,4 +1,4 @@
-/* buffer.c — text editing primitives and shared line-shift helpers. */
+/* buffer.c - text editing primitives and shared line-shift helpers. */
 #include "vim.h"
 
 /* Shift lines [at..nlines-1] down by one to open a slot at `at`.

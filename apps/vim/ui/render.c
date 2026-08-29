@@ -1,4 +1,4 @@
-/* render.c — screen drawing, gutter, cursor placement. */
+/* render.c - screen drawing, gutter, cursor placement. */
 #include "vim.h"
 
 /* ── Rendering ─────────────────────────────────────────────────────── */

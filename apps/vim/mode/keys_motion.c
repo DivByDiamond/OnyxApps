@@ -1,4 +1,4 @@
-/* keys_motion.c — NORMAL-mode operator-pending and motion/scroll keys.
+/* keys_motion.c - NORMAL-mode operator-pending and motion/scroll keys.
  * Return codes: 0 = not consumed, 1 = consumed (continue to trailing
  * logic), 2 = consumed (return immediately). */
 #include "vim.h"
@@ -155,7 +155,7 @@ static int motion_cases(int k, int n) {
         case K_CTRL_U:
             cy -= (rows - 2) / 2; if (cy < 0) cy = 0; clamp_cursor(); break;
         case 'z':
-            /* zz — center */
+            /* zz - center */
             top = cy - (rows - 2) / 2;
             if (top < 0) top = 0;
             break;

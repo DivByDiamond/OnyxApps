@@ -1,4 +1,4 @@
-/* operators.c — operator commands: d/c/y variants, indent. */
+/* operators.c - operator commands: d/c/y variants, indent. */
 #include "vim.h"
 
 /* ── Deleting with operators ───────────────────────────────────────── */

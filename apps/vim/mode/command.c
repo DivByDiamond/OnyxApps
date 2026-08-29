@@ -1,4 +1,4 @@
-/* command.c — COMMAND mode (:) implementation: w/q/e/r/set/s. */
+/* command.c - COMMAND mode (:) implementation: w/q/e/r/set/s. */
 #include "vim.h"
 /* ── Command mode (:cmd) ───────────────────────────────────────────── */
 void run_command(char *cmd) {
@@ -86,12 +86,12 @@ void run_command(char *cmd) {
     } else if (strcmp(cmd, "h") == 0 || strcmp(cmd, "help") == 0) {
         raw_disable();
         printf("\x1b[2J\x1b[1;1H");
-        printf("vim (OnyxOS) — modal editor\r\n\r\n");
-        printf("hjkl w b 0 $ gg G — move      x dd dw — delete\r\n");
-        printf("yy p P   — yank/paste        u Ctrl+r — undo/redo\r\n");
-        printf("i a I A o O — insert modes    v V — visual\r\n");
-        printf("/pat n N  — search            :w :q :wq :q! :e f\r\n");
-        printf(":s/old/new/g :%s///  5j 3dd — counts\r\n\r\n");
+        printf("vim (OnyxOS) - modal editor\r\n\r\n");
+        printf("hjkl w b 0 $ gg G - move      x dd dw - delete\r\n");
+        printf("yy p P   - yank/paste        u Ctrl+r - undo/redo\r\n");
+        printf("i a I A o O - insert modes    v V - visual\r\n");
+        printf("/pat n N  - search            :w :q :wq :q! :e f\r\n");
+        printf(":s/old/new/g :%s///  5j 3dd - counts\r\n\r\n");
         printf("Press any key...\r\n");
         fflush(stdout);
         read_key();
