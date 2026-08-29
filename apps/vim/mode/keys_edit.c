@@ -1,4 +1,4 @@
-/* keys_edit.c — NORMAL-mode editing keys: delete/change/yank/paste,
+/* keys_edit.c - NORMAL-mode editing keys: delete/change/yank/paste,
  * replace, join, indent, undo/redo, insert/visual entry, search entry,
  * bracket match. Returns: 0 = not consumed, 1 = consumed (continue),
  * 2 = consumed (return immediately). */

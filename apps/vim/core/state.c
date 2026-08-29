@@ -1,4 +1,4 @@
-/* state.c — editor state: buffer, cursor, registers, undo, pending ops. */
+/* state.c - editor state: buffer, cursor, registers, undo, pending ops. */
 #include "vim.h"
 
 char lines[MAX_LINES][MAX_LINE];

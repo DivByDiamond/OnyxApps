@@ -1,4 +1,4 @@
-/* search.c — pattern search, f/F/t/T char find and its pending state. */
+/* search.c - pattern search, f/F/t/T char find and its pending state. */
 #include "vim.h"
 
 /* ── Search ────────────────────────────────────────────────────────── */

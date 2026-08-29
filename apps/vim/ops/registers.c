@@ -1,4 +1,4 @@
-/* registers.c — yank/paste registers (linewise and charwise). */
+/* registers.c - yank/paste registers (linewise and charwise). */
 #include "vim.h"
 
 /* ── Registers (yank/paste) ────────────────────────────────────────── */

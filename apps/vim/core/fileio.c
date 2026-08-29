@@ -1,4 +1,4 @@
-/* fileio.c — file load/save. */
+/* fileio.c - file load/save. */
 #include "vim.h"
 
 /* ── File I/O ──────────────────────────────────────────────────────── */

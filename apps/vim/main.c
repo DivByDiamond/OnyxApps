@@ -1,4 +1,4 @@
-/* main.c — program entry: argument handling and the editor loop. */
+/* main.c - program entry: argument handling and the editor loop. */
 #include "vim.h"
 
 /* ── Main ──────────────────────────────────────────────────────────── */
@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
         nlines = 1;
         llen[0] = 0;
         lines[0][0] = 0;
-        strcpy(msg, "vim 1.0 — :h for help");
+        strcpy(msg, "vim 1.0 - :h for help");
     }
 
     query_size();

@@ -1,4 +1,4 @@
-# OnyxApps — build all apps with OnyxCC.
+# OnyxApps - build all apps with OnyxCC.
 #
 #   make            build every app into build/
 #   make vim        build one app

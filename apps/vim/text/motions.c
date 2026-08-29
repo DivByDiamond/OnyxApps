@@ -1,4 +1,4 @@
-/* motions.c — word-motion primitives and bracket matching. */
+/* motions.c - word-motion primitives and bracket matching. */
 #include "vim.h"
 
 /* ── Word motions ──────────────────────────────────────────────────── */

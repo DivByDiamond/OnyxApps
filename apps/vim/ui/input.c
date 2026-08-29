@@ -1,4 +1,4 @@
-/* input.c — terminal raw mode, size query and key decoding. */
+/* input.c - terminal raw mode, size query and key decoding. */
 #include "vim.h"
 
 /* ── Input ─────────────────────────────────────────────────────────── */
@@ -22,7 +22,7 @@ int read_key(void) {
     s1 = s2 = s3 = 0;
     if (kbread(&s1) <= 0) return 0x1b;
     if (s1 != '[') {
-        /* Not a CSI sequence — return the pushed-back byte next time so
+        /* Not a CSI sequence - return the pushed-back byte next time so
          * ESC immediately followed by a command char works both from
          * terminals (bytes arrive separately) and scripts (piped). */
         key_pushback = s1;

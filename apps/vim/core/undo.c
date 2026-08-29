@@ -1,4 +1,4 @@
-/* undo.c — change recording, undo and redo application. */
+/* undo.c - change recording, undo and redo application. */
 #include "vim.h"
 
 /* ── Undo ──────────────────────────────────────────────────────────── */
