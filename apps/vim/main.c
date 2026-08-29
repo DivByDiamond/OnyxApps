@@ -1,31 +1,5 @@
-/* main.c — terminal setup and program entry. */
+/* main.c — program entry: argument handling and the editor loop. */
 #include "vim.h"
-/* ── Terminal ──────────────────────────────────────────────────────── */
-void raw_enable(void) {
-    struct termios t;
-    tcgetattr(0, &orig_tio);
-    t = orig_tio;
-    cfmakeraw_apply(&t);
-    tcsetattr(0, 0, &t);
-    raw_on = 1;
-}
-
-void raw_disable(void) {
-    if (raw_on) {
-        tcsetattr(0, 0, &orig_tio);
-        raw_on = 0;
-    }
-}
-
-void query_size(void) {
-    unsigned short ws[4] = {24, 80, 0, 0};
-    if (_onyx_ioctl(0, 0x5413, (long)ws) == 0 && ws[0] > 3 && ws[1] > 10) {
-        rows = ws[0];
-        cols = ws[1];
-    }
-    if (rows < 8) rows = 8;
-    if (cols < 24) cols = 24;
-}
 
 /* ── Main ──────────────────────────────────────────────────────────── */
 int main(int argc, char **argv) {

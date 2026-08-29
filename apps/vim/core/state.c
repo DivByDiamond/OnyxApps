@@ -1,5 +1,6 @@
 /* state.c — editor state: buffer, cursor, registers, undo, pending ops. */
 #include "vim.h"
+
 char lines[MAX_LINES][MAX_LINE];
 int llen[MAX_LINES];
 int nlines = 0;

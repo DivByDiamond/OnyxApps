@@ -1,30 +1,26 @@
-/* buffer.c — undo recording and text editing primitives. */
+/* buffer.c — text editing primitives and shared line-shift helpers. */
 #include "vim.h"
-/* ── Undo ──────────────────────────────────────────────────────────── */
-void undo_record_k(int line, int col, const char *deleted,
-                          int dlen, int lines_removed, int kind);
-void undo_record(int line, int col, const char *deleted,
-                        int dlen, int lines_removed) {
-    undo_record_k(line, col, deleted, dlen, lines_removed,
-                  lines_removed ? UNDO_DEL_LINE : UNDO_DEL_TEXT);
+
+/* Shift lines [at..nlines-1] down by one to open a slot at `at`.
+ * Returns 0 when the buffer is full. */
+int make_room(int at) {
+    int i;
+    if (nlines >= MAX_LINES) return 0;
+    for (i = nlines; i > at; i--) {
+        memcpy(lines[i], lines[i - 1], MAX_LINE);
+        llen[i] = llen[i - 1];
+    }
+    return 1;
 }
 
-void undo_record_k(int line, int col, const char *deleted,
-                          int dlen, int lines_removed, int kind) {
-    undo_t *u;
-    if (nundos >= UNDO_MAX) {
-        int i;
-        for (i = 0; i < UNDO_MAX - 1; i++) undos[i] = undos[i + 1];
-        nundos = UNDO_MAX - 1;
+/* Close the gap at `row` by shifting the tail up. */
+void remove_at(int row) {
+    int i;
+    for (i = row; i < nlines - 1; i++) {
+        memcpy(lines[i], lines[i + 1], MAX_LINE);
+        llen[i] = llen[i + 1];
     }
-    u = &undos[nundos++];
-    u->pos_line = line;
-    u->pos_col = col;
-    u->deleted_len = dlen < MAX_LINE ? dlen : MAX_LINE - 1;
-    if (dlen > 0 && deleted) memcpy(u->deleted, deleted, u->deleted_len);
-    u->deleted[u->deleted_len] = 0;
-    u->lines_removed = lines_removed;
-    u->kind = kind;
+    nlines--;
 }
 
 /* ── Text editing primitives ───────────────────────────────────────── */
@@ -47,12 +43,8 @@ void insert_char(int c) {
 void split_line(void) {
     int i, tail;
     ensure_buffer();
-    if (nlines >= MAX_LINES) return;
     if (cx > llen[cy]) cx = llen[cy];
-    for (i = nlines; i > cy + 1; i--) {
-        memcpy(lines[i], lines[i - 1], MAX_LINE);
-        llen[i] = llen[i - 1];
-    }
+    if (!make_room(cy + 1)) return;
     tail = llen[cy] - cx;
     if (tail > 0) memcpy(lines[cy + 1], lines[cy] + cx, tail);
     lines[cy + 1][tail] = 0;
@@ -92,10 +84,6 @@ void del_line(int row) {
         return;
     }
     undo_record_k(row, 0, lines[row], llen[row], 1, UNDO_DEL_LINE);
-    for (i = row; i < nlines - 1; i++) {
-        memcpy(lines[i], lines[i + 1], MAX_LINE);
-        llen[i] = llen[i + 1];
-    }
-    nlines--;
+    remove_at(row);
     dirty = 1;
 }
