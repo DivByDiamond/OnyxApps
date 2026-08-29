@@ -28,7 +28,7 @@ monorepo for [OnyxOS](https://github.com/DivByDiamond/OnyxOS).
 
 ```sh
 make oed                    # from the repo root (onyxcc in PATH or ONYXCC=...)
-onyxcc -o oed.onx apps/oed/oed.c   # manual; libonyxc is auto-linked
+onyxcc -I apps/oed -o oed.onx apps/oed/src/*.c   # manual; libonyxc is auto-linked
 ```
 
 ## Usage
@@ -55,7 +55,19 @@ framebuffer grid - provided by OnyxKernel v0.4+.
 
 ## Notes
 
-- Migrated as a single file from OnyxOS `software/` (v0.6); splitting it
-  to the 200-line project layout is pending
+- Migrated as a single file from OnyxOS `software/` (v0.6); now split into
+  modules following the 200-line project layout (see Project structure)
 
 Licensed under GPL-3.0-or-later.
+
+## Project structure
+
+```text
+apps/oed/
+  README.md    this file
+  oed.h        shared state (extern) and module API
+  src/
+    main.c     key decoding (read_key) and the editor main loop
+    edit.c     buffer state, editing primitives, file I/O
+    screen.c   terminal control (raw mode, size) and rendering
+```

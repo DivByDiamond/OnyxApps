@@ -25,7 +25,7 @@ monorepo for [OnyxOS](https://github.com/DivByDiamond/OnyxOS).
 
 ```sh
 make osysmon                # from the repo root (onyxcc in PATH or ONYXCC=...)
-onyxcc -o osysmon.onx apps/osysmon/osysmon.c   # manual; libonyxc is auto-linked
+onyxcc -o osysmon.onx apps/osysmon/*.c   # manual; libonyxc is auto-linked
 ```
 
 ## Usage
@@ -43,9 +43,24 @@ Works on the kernel's ANSI/VT100 terminal (fb_term/ansi): colors SGR
 per-process termios via TCGETS/TCSETS, TIOCGWINSZ returning the real
 framebuffer grid - provided by OnyxKernel v0.4+.
 
+## Project structure
+
+See the layout rules in the
+[main README](https://github.com/DivByDiamond/OnyxApps#layout-rules-project-wide)
+(max 4 files per folder, max 200 lines per file).
+
+```
+apps/osysmon/
+├── README.md     this document
+├── osysmon.h     shared types (utsname) + module API
+├── osysmon.c     program entry: terminal raw mode, size probe, main loop
+└── monitor.c     data probes via syscalls (uname, uptime, heap, readdir)
+                  and the box/bar drawing primitives
+```
+
 ## Notes
 
-- Migrated as a single file from OnyxOS `software/` (v0.6); splitting it
-  to the 200-line project layout is pending
+- Migrated as a single file from OnyxOS `software/` (v0.6); now split into
+  the 200-line project layout (see Project structure above)
 
 Licensed under GPL-3.0-or-later.
