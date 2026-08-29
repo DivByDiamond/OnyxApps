@@ -116,16 +116,20 @@ void raw_enable(void);
 void raw_disable(void);
 void query_size(void);
 
-/* ── Buffer helpers (state.c) ──────────────────────────────────────── */
+/* ── Buffer helpers / shared shifts (state.c, buffer.c) ────────────── */
 void ensure_buffer(void);
 void clamp_cursor(void);
 void scroll_view(void);
+int  make_room(int at);   /* open a slot at `at`; 0 = buffer full */
+void remove_at(int row);  /* close the gap at `row` */
 
 /* ── Undo / primitives (buffer.c) ──────────────────────────────────── */
 void undo_record(int line, int col, const char *deleted,
                  int dlen, int lines_removed);
 void undo_record_k(int line, int col, const char *deleted,
                    int dlen, int lines_removed, int kind);
+void do_undo(void);
+void do_redo(void);
 void insert_char(int c);
 void split_line(void);
 void del_char_at(int row, int col);
@@ -136,9 +140,11 @@ int  is_word(int c);
 void motion_word_forward(void);
 void motion_word_back(void);
 void motion_word_end(void);
+void bracket_match(void);   /* % — jump to matching bracket */
 int  find_str(const char *pat, int from_line, int from_col,
               int *out_line, int *out_col);
 int  do_find_char(int dir, int til, int c);
+void find_pending_key(int k);   /* consume key while f/F/t/T is pending */
 
 /* ── Registers / operators (ops.c) ─────────────────────────────────── */
 void yank_line_range(int from, int to);
@@ -168,7 +174,11 @@ int  read_key(void);
 /* ── Command mode (command.c) ──────────────────────────────────────── */
 void run_command(char *cmd);
 
-/* ── Normal-mode dispatch (keys.c) ─────────────────────────────────── */
+/* ── Normal-mode dispatch (mode/) ──────────────────────────────────── */
 void normal_key(int k);
+/* key handlers return: 0 = not consumed, 1 = consumed (continue),
+ * 2 = consumed (return immediately) */
+int  key_motion(int k, int n);
+int  key_edit(int k, int n);
 
 #endif /* VIM_H */

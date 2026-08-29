@@ -1,5 +1,6 @@
 /* render.c — screen drawing, gutter, cursor placement. */
 #include "vim.h"
+
 /* ── Rendering ─────────────────────────────────────────────────────── */
 int gut_width(void) {
     int w = 1, n = nlines;

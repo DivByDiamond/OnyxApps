@@ -29,7 +29,7 @@ jobs:
       - name: gcc syntax-only check against libonyxc headers
         run: |
           INC="OnyxCompiller/libonyxc/include"
-          for f in apps/${{ matrix.app }}/*.c; do
+          for f in $(find apps/${{ matrix.app }} -name '*.c'); do
             echo "== $f"
             gcc -std=gnu11 -fsyntax-only \
               -Wno-error=incompatible-pointer-types \

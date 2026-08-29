@@ -24,6 +24,30 @@ publishes `.onx` artifacts — no per-app repo / artifact-sync overhead.
 |-----|--------|-------------|
 | `vim` | [apps/vim](apps/vim) | Modal text editor (vim-inspired), see bindings below |
 
+## Layout rules (project-wide)
+
+- **max 4 files per folder** — one folder = one subsystem;
+- **max 200 lines per file** — one responsibility per file;
+- KISS / DRY: shared logic lives in exactly one place.
+
+Reference structure (`apps/vim`):
+
+```
+apps/vim/
+├── vim.h            shared state (extern) + full API
+├── main.c           program entry: args + editor loop
+├── core/            state.c  buffer.c  undo.c  fileio.c
+│                    (buffer state, edit primitives, undo/redo, load/save)
+├── ops/             registers.c  operators.c
+│                    (yank/paste registers, d/c/y operators, indent)
+├── text/            motions.c  search.c
+│                    (word motions, %, pattern search, f/F/t/T)
+├── mode/            keys.c  keys_motion.c  keys_edit.c  command.c
+│                    (NORMAL dispatcher, motion keys, edit keys, : commands)
+└── ui/              render.c  input.c
+                     (drawing, cursor, raw term, key decoding)
+```
+
 ## Build
 
 Requires `onyxcc` (built from OnyxCompiller: `make -C OnyxCompiller`).
@@ -51,6 +75,16 @@ OnyxOS as `vim [file]`.
   (fast feedback, no toolchain build).
 - **build** — builds OnyxCC from source, compiles every app into `.onx`,
   validates the `ONX1` magic, uploads artifacts.
+
+## Roadmap / known quirks (inherited from the original vim.c)
+
+- `ZZ`/`ZQ` — the save-and-quit block is unreachable in the original
+  dispatcher (the `Z` case returns first and the `g_pending` block clears
+  the flag). Preserved verbatim during the split; fix is pending.
+- `.` (repeat last change) is a stub message.
+- Relative line numbers (`:set rnu`) render but the ruler is shared with
+  absolute numbers.
+- `N` (reverse search repeat) prints a hint; use `?pattern` instead.
 
 ---
 

@@ -1,5 +1,6 @@
 /* fileio.c — file load/save. */
 #include "vim.h"
+
 /* ── File I/O ──────────────────────────────────────────────────────── */
 void load_file(const char *path) {
     FILE *f;
