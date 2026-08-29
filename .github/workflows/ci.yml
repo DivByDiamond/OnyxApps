@@ -1,0 +1,75 @@
+name: OnyxApps CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Fast feedback: gcc syntax-only pass of every app against the libonyxc
+  # freestanding headers (OnyxCompiller). Does not need the toolchain.
+  syntax-check:
+    name: syntax-check (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [vim]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Checkout OnyxCompiller (libonyxc headers)
+        uses: actions/checkout@v6
+        with:
+          repository: DivByDiamond/OnyxCompiller
+          path: OnyxCompiller
+
+      - name: gcc syntax-only check against libonyxc headers
+        run: |
+          INC="OnyxCompiller/libonyxc/include"
+          for f in apps/${{ matrix.app }}/*.c; do
+            echo "== $f"
+            gcc -std=gnu11 -fsyntax-only \
+              -Wno-error=incompatible-pointer-types \
+              -I"$INC/io" -I"$INC/core" -I"apps/${{ matrix.app }}" \
+              "$f"
+          done
+
+  # Full build: compile OnyxCC from source, then build every app into .onx
+  # and validate the ONX1 magic. Artifacts are uploaded on every push.
+  build:
+    name: build (${{ matrix.app }}.onx)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [vim]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Checkout OnyxCompiller
+        uses: actions/checkout@v6
+        with:
+          repository: DivByDiamond/OnyxCompiller
+          path: OnyxCompiller
+
+      - name: Build OnyxCC from source
+        run: make -C OnyxCompiller
+
+      - name: Build app (.onx)
+        run: |
+          mkdir -p build
+          make ONYXCC="$PWD/OnyxCompiller/onyxcc" build/${{ matrix.app }}.onx
+          ls -l build/
+
+      - name: Validate ONX1 magic
+        run: |
+          head -c 4 build/${{ matrix.app }}.onx | grep -q 'ONX1'
+          echo "magic OK: ONX1 ($(stat -c%s build/${{ matrix.app }}.onx) bytes)"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.app }}.onx
+          path: build/${{ matrix.app }}.onx
