@@ -56,7 +56,9 @@ jobs:
           path: OnyxCompiller
 
       - name: Build OnyxCC from source
-        run: make -C OnyxCompiller
+        # -B: fresh checkouts give all files equal mtimes, so a plain make
+        # would consider the committed prebuilt onyxcc up to date.
+        run: make -B -C OnyxCompiller
 
       - name: Build app (.onx)
         run: |
