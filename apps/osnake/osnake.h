@@ -23,7 +23,12 @@
 /* Board grid in cells; the board is drawn 1:1 as characters. */
 #define GRID_W 32
 #define GRID_H 16
-#define MAX_LEN 512 /* == GRID_W * GRID_H: full board is a win */
+/* MAX_LEN must keep every later struct member offset below 2048 bytes:
+ * onyxcc (v0.5) encodes struct member offsets in a signed 12-bit field,
+ * so members past 2047 bytes silently alias earlier ones (found with
+ * tests/native + onx-run; upstream fix tracked in OnyxCompiller).
+ * 240 * sizeof(struct point) = 1920 bytes, safe with headroom. */
+#define MAX_LEN 240
 
 /* Directions; opposite pairs differ by XOR with 2. */
 #define DIR_UP 0
