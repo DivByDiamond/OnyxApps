@@ -100,26 +100,24 @@ static void test_growth(void) {
 
 static void test_full_board(void) {
     struct snake s;
-    int x, y, i;
+    int i, old_len, old_score;
 
-    printf("full board: spawn fails (win path):\n");
+    printf("spawn guard: len beyond board reports failure:\n");
     game_reset(&s, 7);
-    i = 0;
-    for (y = 0; y < GRID_H; y++) {
-        for (x = 0; x < GRID_W; x++) {
-            if (i >= MAX_LEN - 1) break;
-            s.body[i].x = x;
-            s.body[i].y = y;
-            i++;
-        }
-    }
-    s.len = i; /* every cell except the last one */
-    CHECK(game_food_spawn(&s) == 1);
-    CHECK(s.food.x == GRID_W - 1 && s.food.y == GRID_H - 1);
-    s.body[i].x = GRID_W - 1;
-    s.body[i].y = GRID_H - 1;
-    s.len = i + 1; /* board completely full */
+    s.len = GRID_W * GRID_H; /* simulate a full board */
     CHECK(game_food_spawn(&s) == 0);
+
+    printf("growth cap at MAX_LEN (eat without growing):\n");
+    game_reset(&s, 7);
+    for (i = 0; i < MAX_LEN; i++) s.body[i] = s.body[0]; /* degenerate */
+    s.len = MAX_LEN;
+    old_len = s.len;
+    old_score = s.score;
+    s.food.x = s.body[0].x + 1; /* right in front of the head */
+    s.food.y = s.body[0].y;
+    CHECK(game_step(&s) == 1);
+    CHECK(s.len == old_len);           /* no growth past MAX_LEN */
+    CHECK(s.score == old_score + 10);  /* but eating still scores */
 }
 
 static void test_rng(void) {

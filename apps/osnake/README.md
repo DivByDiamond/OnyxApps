@@ -20,7 +20,7 @@ monorepo for [OnyxOS](https://github.com/DivByDiamond/OnyxOS).
 - Walls and self-contact are lethal; food grows the snake (+10 points)
 - Auto speed-up as the score grows; explicit tick interval via argv
 - Deterministic LCG food sequence (seeded from clock + PID)
-- Game over / win overlays (fill the whole board to win)
+- Game over / win overlays (steer the snake to maximum length (240) to win)
 
 ## Build
 
