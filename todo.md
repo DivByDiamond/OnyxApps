@@ -12,7 +12,7 @@ C99, self-contained folder under `apps/`, one responsibility per file.
 |---------|--------|-------------|-------|
 | osnake  | wip    | Classic snake game on the ANSI terminal (raw termios, non-blocking input, wall/self collision, auto speed-up) | `game/` pure logic is host-testable |
 | otop    | wip    | btop-style system monitor for OnyxOS: reads real data from `/proc` (meminfo, load, cpuinfo, uptime) + own heap via sbrk, heap history sparkline | unlike osysmon shows kernel-provided values, not synthetic bars |
-| ohttp   | wip    | Minimal HTTP/1.1 GET client (`ip[:port]/path` -> file), obrowse stage 1 | fetches and prints headers successfully end-to-end in QEMU; writing the body still blocked on a kernel bug, see below |
+| ohttp   | wip    | Minimal HTTP/1.1 GET client (`host[:port]/path` -> file, host = IPv4 or DNS name), obrowse stage 1 | fetches and prints headers successfully end-to-end in QEMU, including hostname targets via `net_resolve()` |
 | otree   | idea   | Directory tree renderer (`otree [path]`), recursive readdir + box-drawing ASCII | small, one evening |
 | ocalc   | idea   | Infix calculator with +-*/% and parentheses, `math.h` for sqrt/pow | parser ~150 lines, keep it pure and test it |
 | omas    | idea   | "Matrix rain" ANSI screensaver, pure ASCII glyphs | fun demo for screenshots |
@@ -31,8 +31,8 @@ because of kernel limits (OnyxKernel `net_sys`):
 
 - only outbound TCP: `connect/send/recv/close`, max 8 connections
 - no `listen/accept`, no TLS, HTTP only
-- DNS is not exposed to userland: net syscalls take a raw IPv4 address,
-  so either add a DNS resolver syscall to the kernel or use a hosts-file
+- DNS **is now exposed to userland** (`net_resolve()`, see below) — was
+  the last item on this list, no longer a blocker
 
 Staged plan:
 
@@ -59,24 +59,31 @@ Staged plan:
      backwards, so DHCP replies and TCP ACKs never matched a live
      socket/connection (fixed)
 
-   Two more bugs surfaced while chasing this, both **not fixed, not
-   ohttp-specific**:
-   - `usleep()`/`nanosleep()` hangs forever on the first call — `ohttp`
-     works around it with a busy-spin instead of a real sleep
-     (`http/response.c`, see the comment on `OHTTP_RECV_RETRIES`)
+   Two more bugs surfaced while chasing this — both now **fixed** in
+   `OnyxKernel/todo.md`:
+   - `usleep()`/`nanosleep()` hung forever on the first call (fixed
+     2026-09-02, MTIP timer-interrupt forwarding); `ohttp` can drop its
+     busy-spin workaround (`OHTTP_RECV_RETRIES` in `http/response.c`)
+     whenever someone gets to it, it's just no longer required.
    - the initial user stack pointer sits only a couple KB below
      `USER_TOP`, so `argv` strings (which the loader also puts near the
-     top of the stack) can fail the kernel's `user_ptr_ok` check —
-     `ohttp` currently can't reliably open its own `argv[2]` output path
-     for writing (`sys_open: parse_user_path failed`). Moved `ohttp`'s
-     own 8KB header buffer off the stack (`static`) to dodge the same
-     class of bug for its own reads, but the `argv` case is a loader/ABI
-     issue outside app control.
+     top of the stack) failed the kernel's `parse_user_path` check —
+     fixed 2026-09-03 (validation window now clamped to how much room
+     the pointer actually has before `USER_TOP` instead of a flat 256
+     bytes). `ohttp` can open its own `argv[2]` now; the `static` header
+     buffer workaround for reads is still fine to keep either way.
+   DNS resolution landed 2026-09-03: `net_resolve()` (libonyxc `io/net.h`,
+   kernel syscall #89) does a blocking A-record lookup, and
+   `ohttp_parse_target` (`net/request.c`) now resolves any non-IPv4
+   target through it before connecting. Live-tested in QEMU with real
+   `-netdev user` networking (not guestfwd): `example.com` resolves to
+   a real public IP, confirmed by pcap.
 2. `obrowse` stage A - render a fetched HTML page as text in a TUI
    (strip tags, keep link list `[1] text`, scroll with PgUp/PgDn).
 3. `obrowse` stage B - follow links: resolve relative URLs, fetch, redraw.
 4. `obrowse` stage C (needs kernel patches, separate repo):
-   DNS resolution syscall and bigger recv buffers.
+   bigger recv buffers / clean EOF semantics for `tcp_recv` (DNS
+   resolution is done, see above).
 
 ## How to add an app
 

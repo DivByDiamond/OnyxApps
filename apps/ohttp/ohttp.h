@@ -3,10 +3,10 @@
  * GET client. First step toward obrowse (see README.md): fetches one URL
  * to a local file over plain TCP.
  *
- * No DNS, no TLS: OnyxKernel exposes outbound TCP connect/send/recv only
- * (kernel/src/syscall/net_sys.rs, #80-83). Caller supplies the server IP
- * directly, the same way `curl --resolve` sidesteps DNS. http:// only;
- * an https:// URL is rejected up front with a clear error.
+ * No TLS: hostnames are resolved via the kernel's net_resolve() DNS
+ * syscall (kernel/src/syscall/net_sys.rs, #89), then fetched over plain
+ * outbound TCP (#80-83). http:// only; an https:// URL is rejected up
+ * front with a clear error.
  */
 #ifndef OHTTP_H
 #define OHTTP_H
@@ -26,8 +26,9 @@ typedef struct {
     char          path[OHTTP_MAX_PATH];  /* request path, defaults to "/" */
 } ohttp_target;
 
-/* Parses "ip:port/path" or "ip/path" (no scheme, no DNS) into *out.
- * Returns 0 on success, -1 on a malformed target (message on stderr). */
+/* Parses "host:port/path" or "host/path" (host = IPv4 or a DNS name, no
+ * scheme) into *out. Returns 0 on success, -1 on a malformed or
+ * unresolvable target (message on stderr). */
 int ohttp_parse_target(const char *arg, ohttp_target *out);
 
 /* Opens a TCP connection to target->ip:port. Returns conn_id >= 0, or -1

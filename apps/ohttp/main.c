@@ -5,8 +5,8 @@
  *   ohttp 93.184.216.34/index.html page.html
  *   ohttp 10.0.2.2:8080/api/data.json data.json
  *
- * No DNS in userspace yet (todo.md): the target is an IPv4, not a
- * hostname. Fetches over plain HTTP/1.1 and writes the body to outfile.
+ * Accepts a raw IPv4 or a hostname (resolved via net_resolve()). Fetches
+ * over plain HTTP/1.1 and writes the body to outfile.
  */
 #include <stdio.h>
 #include <net.h>
