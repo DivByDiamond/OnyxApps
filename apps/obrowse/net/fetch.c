@@ -131,7 +131,7 @@ long obrowse_fetch(const char *url, char *out_buf, size_t out_cap) {
     unsigned char ip[4];
     int port;
     if (url[0] != '\0' && url[0] == 'h' && url[1] == 't' && url[2] == 't' && url[3] == 'p' && url[4] == 's') {
-        fprintf(stderr, "obrowse: https:// not supported (no TLS in-kernel)\n");
+        fprintf(stderr, "obrowse: HTTPS is not supported (no TLS in kernel). Use http:// URLs.\n");
         return -1;
     }
     const char *arg = url;
@@ -194,4 +194,3 @@ long obrowse_fetch(const char *url, char *out_buf, size_t out_cap) {
     else out_buf[out_cap - 1] = '\0';
     return (long)out_used;
 }
--- 
