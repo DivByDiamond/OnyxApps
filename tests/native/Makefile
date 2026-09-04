@@ -20,11 +20,15 @@ OSNAKE_INC := -I $(ROOT)/apps/osnake
 OTOP_SRC := $(ROOT)/apps/otop/probe/parse.c
 OTOP_INC := -I $(ROOT)/apps/otop
 
+OBROWSE_SRC := $(ROOT)/apps/obrowse/html/parser.c
+OBROWSE_INC := -I $(ROOT)/apps/obrowse
+
 .PHONY: test clean
 
-test: test_osnake test_otop
+test: test_osnake test_otop test_obrowse
 	./test_osnake
 	./test_otop
+	./test_obrowse
 
 test_osnake: test_osnake.c $(OSNAKE_SRC)
 	$(CC) $(CFLAGS) $(OSNAKE_INC) -o $@ test_osnake.c $(OSNAKE_SRC)
@@ -32,5 +36,8 @@ test_osnake: test_osnake.c $(OSNAKE_SRC)
 test_otop: test_otop.c $(OTOP_SRC)
 	$(CC) $(CFLAGS) $(OTOP_INC) -o $@ test_otop.c $(OTOP_SRC)
 
+test_obrowse: test_obrowse.c $(OBROWSE_SRC)
+	$(CC) $(CFLAGS) $(OBROWSE_INC) -o $@ test_obrowse.c $(OBROWSE_SRC)
+
 clean:
-	rm -f test_osnake test_otop
+	rm -f test_osnake test_otop test_obrowse
