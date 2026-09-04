@@ -21,7 +21,7 @@ struct obrowse_page {
 
 int obrowse_html_parse(const char *body, size_t body_len, struct obrowse_page *page);
 
-long obrowse_fetch(const char *url, char *out_buf, size_t out_cap, int *http_status);
+long obrowse_fetch(const char *url, char *out_buf, size_t out_cap);
 
 int obrowse_url_resolve(const char *base, const char *href, char *out, size_t out_cap);
 

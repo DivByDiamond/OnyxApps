@@ -62,4 +62,3 @@ void ui_show_error(const char *kind, const char *url, int http_status, int my_er
         printf("Network error.\r\n");
     }
 }
--- 
