@@ -11,8 +11,7 @@ btop-style system monitor for OnyxOS, part of
 [OnyxApps](https://github.com/DivByDiamond/OnyxApps) - the userland apps
 monorepo for [OnyxOS](https://github.com/DivByDiamond/OnyxOS).
 
-Unlike osysmon (which renders some synthetic demo bars), every number in
-otop comes from the kernel: the `/proc` pseudo files (meminfo, load,
+Every number in otop comes from the kernel: the `/proc` pseudo files (meminfo, load,
 cpuinfo, uptime) filled by OnyxKernel `fs/procfs`, `uname`, and the
 process's own heap via `sbrk(0)`.
 
