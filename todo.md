@@ -11,7 +11,7 @@ C99, self-contained folder under `apps/`, one responsibility per file.
 | App     | Status | Description | Notes |
 |---------|--------|-------------|-------|
 | osnake  | wip    | Classic snake game on the ANSI terminal (raw termios, non-blocking input, wall/self collision, auto speed-up) | `game/` pure logic is host-testable |
-| otop    | wip    | btop-style system monitor for OnyxOS: reads real data from `/proc` (meminfo, load, cpuinfo, uptime) + own heap via sbrk, heap history sparkline | unlike osysmon shows kernel-provided values, not synthetic bars |
+| otop    | wip    | btop-style system monitor for OnyxOS: reads real data from `/proc` (meminfo, load, cpuinfo, uptime) + own heap via sbrk, heap history sparkline | kernel-provided values, not synthetic bars |
 | ohttp   | wip    | Minimal HTTP/1.1 GET client (`host[:port]/path` -> file, host = IPv4 or DNS name), obrowse stage 1 | fetches and prints headers successfully end-to-end in QEMU, including hostname targets via `net_resolve()` |
 | otree   | idea   | Directory tree renderer (`otree [path]`), recursive readdir + box-drawing ASCII | small, one evening |
 | ocalc   | idea   | Infix calculator with +-*/% and parentheses, `math.h` for sqrt/pow | parser ~150 lines, keep it pure and test it |

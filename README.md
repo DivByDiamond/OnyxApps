@@ -69,7 +69,6 @@ artifact-sync overhead. The system components stay in their own repos:
 |-----|--------|------|-------------|
 | **vim** | [apps/vim](apps/vim) | [apps/vim/README.md](apps/vim/README.md) | Modal text editor (vim-inspired) |
 | **oed** | [apps/oed](apps/oed) | [apps/oed/README.md](apps/oed/README.md) | Full-screen text editor (nano-style) |
-| **osysmon** | [apps/osysmon](apps/osysmon) | [apps/osysmon/README.md](apps/osysmon/README.md) | System monitor (btop/htop-style) |
 
 Full documentation lives in **each app's own `README.md`**; this file covers
 the monorepo only.
