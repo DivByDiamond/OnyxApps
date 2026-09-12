@@ -80,6 +80,11 @@ void get_size(void);
 int key_poll(void);
 void nap_ms(int ms);
 
+/* Buffered output for atomic frame (main.c). */
+void obuf_reset(void);
+void obuf_printf(const char *fmt, ...);
+void obuf_flush(void);
+
 extern int screen_rows;
 extern int screen_cols;
 
