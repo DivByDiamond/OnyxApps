@@ -2,3 +2,5 @@ build/
 *.onx
 *.o
 tests/native/test_*
+
+.claude/
