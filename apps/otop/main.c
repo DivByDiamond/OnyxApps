@@ -8,9 +8,33 @@
  * (freezes the frame and the history), +/- change the interval.
  */
 #include "otop.h"
+#include <stdarg.h>
 
 int screen_rows = 24;
 int screen_cols = 80;
+
+/* Atomic frame buffer: one write() per frame avoids init/log interleaving. */
+static char outbuf[8192];
+static int outpos = 0;
+
+void obuf_reset(void) { outpos = 0; }
+void obuf_printf(const char *fmt, ...) {
+    va_list ap;
+    int n, cap = (int)sizeof(outbuf) - outpos - 1;
+    if (cap <= 0) return;
+    va_start(ap, fmt);
+    n = vsnprintf(outbuf + outpos, cap + 1, fmt, ap);
+    va_end(ap);
+    if (n < 0) return;
+    if (n > cap) n = cap;
+    outpos += n;
+}
+void obuf_flush(void) {
+    if (outpos > 0) {
+        write(1, outbuf, outpos);
+        outpos = 0;
+    }
+}
 
 static struct termios orig_termios;
 static int raw_on = 0;
@@ -93,20 +117,36 @@ int main(int argc, char **argv) {
     memset(&hist, 0, sizeof(hist));
     get_size();
     term_raw_on();
+    /* Alt-screen: isolates TUI from init/login logs that share fd 1. */
+    obuf_reset();
+    obuf_printf("\x1b[?1049h\x1b[2J\x1b[?25l");
+    obuf_flush();
 
     while (!quit) {
         if (!paused) {
+            int y_mem = 3;
+            int y_load = 11;
+            int y_hist = 17;
+            get_size();
             probe_collect(&oi);
             hist_push(&hist, (int)oi.heap_used_kb);
-            printf("\x1b[2J");
+            obuf_reset();
+            obuf_printf("\x1b[2J\x1b[H");
             w = screen_cols - 2;
             if (w > 76) w = 76;
+            if (w < 20) w = 20;
+            /* Compact layout for small OC2R monitors (e.g. GPU T1 40x12). */
+            if (screen_rows < 24) {
+                y_mem = 2;
+                y_load = y_mem + 7;
+                y_hist = (screen_rows >= 18) ? y_load + 6 : -1;
+            }
             draw_header(&oi, frame);
-            panel_memory(3, w, &oi);
-            panel_load(11, w, &oi);
-            panel_history(17, w, &hist);
+            panel_memory(y_mem, w, &oi);
+            panel_load(y_load, w, &oi);
+            if (y_hist >= 0) panel_history(y_hist, w, &hist);
             draw_footer(screen_rows - 1, "q: quit  space: pause  +: slower  -: faster");
-            fflush(stdout);
+            obuf_flush();
             frame++;
         }
 
@@ -121,8 +161,9 @@ int main(int argc, char **argv) {
         /* When unpausing, refresh immediately on the next pass. */
     }
 
-    printf("\x1b[2J\x1b[1;1H\x1b[?25h");
-    fflush(stdout);
+    obuf_reset();
+    obuf_printf("\x1b[?1049l\x1b[?25h\x1b[2J\x1b[H");
+    obuf_flush();
     term_raw_off();
     printf("otop: bye\r\n");
     return 0;
