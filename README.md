@@ -69,6 +69,8 @@ artifact-sync overhead. The system components stay in their own repos:
 |-----|--------|------|-------------|
 | **vim** | [apps/vim](apps/vim) | [apps/vim/README.md](apps/vim/README.md) | Modal text editor (vim-inspired) |
 | **oed** | [apps/oed](apps/oed) | [apps/oed/README.md](apps/oed/README.md) | Full-screen text editor (nano-style) |
+| **lua** | [apps/lua](apps/lua) | [apps/lua/README.md](apps/lua/README.md) | Standard Lua 5.5.1 interpreter |
+| **luac** | [apps/luac](apps/luac) | [apps/luac/README.md](apps/luac/README.md) | Standard Lua 5.5.1 bytecode compiler |
 
 Full documentation lives in **each app's own `README.md`**; this file covers
 the monorepo only.
@@ -107,6 +109,11 @@ make vim                              # build one app
 ONYXCC=/path/to/onyxcc make           # custom compiler path
 ```
 
+Apps can provide `apps/<name>/build.py` for verified vendored upstream
+sources; Make and OnyxOS invoke it with `--compiler` and `--output`. Lua
+and luac use this path. Their archives are compiled by the real-build CI
+matrix; the C-only syntax-check matrix remains for directly stored C apps.
+
 Each `apps/<name>/` tree compiles to `build/<name>.onx`; run it on
 OnyxOS as `vim [file]`.
 
@@ -140,4 +147,5 @@ OnyxOS as `vim [file]`.
 
 ----
 
-Licensed under GPL-3.0-or-later.
+Licensed under GPL-3.0-or-later. The vendored Lua distribution retains its
+MIT license; see [apps/lua/vendor/LICENSE.txt](apps/lua/vendor/LICENSE.txt).
