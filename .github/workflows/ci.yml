@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [vim, oed, osysmon, osnake, otop, ohttp]
+        app: [vim, oed, osysmon, osnake, otop, ohttp, lua, luac]
     steps:
       - uses: actions/checkout@v6
 
