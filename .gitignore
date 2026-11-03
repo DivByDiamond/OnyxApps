@@ -4,3 +4,6 @@ build/
 tests/native/test_*
 
 .claude/
+
+tests/native/tablet/check
+tests/native/tablet/demo

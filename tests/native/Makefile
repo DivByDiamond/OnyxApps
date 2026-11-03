@@ -26,6 +26,7 @@ OBROWSE_INC := -I $(ROOT)/apps/obrowse
 .PHONY: test clean
 
 test: test_osnake test_otop test_obrowse
+	$(MAKE) -C tablet test
 	./test_osnake
 	./test_otop
 	./test_obrowse
