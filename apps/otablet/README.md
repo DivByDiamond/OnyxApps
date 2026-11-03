@@ -4,7 +4,8 @@ A portable C99 pixel dashboard, with a **local mock backend**. Genuine OnyxOS
 remains an RV64 operating system. This widget core can also run natively inside
 a future lightweight tablet host without emulating the OS or its CPU. There is
 no Minecraft integration, radio, network connection, TLS, authentication, Lua
-binding, chart or production device frontend in this increment.
+binding or chart. The graphical OnyxOS frontend uses the existing framebuffer
+and mouse ABI; its service data is still explicitly local mock data.
 
 ## Run
 
@@ -12,6 +13,7 @@ From OnyxApps:
 
 ```sh
 make -C tests/native/tablet test
+make -C tests/native/tablet target-test
 ./tests/native/tablet/demo /tmp/tablet.ppm
 ./tests/native/tablet/demo /tmp/stopped.ppm 10 70
 ./tests/native/tablet/demo /tmp/offline.ppm 10 70 offline
@@ -25,14 +27,49 @@ back into the same persistent native demo process. Click TOGGLE MACHINE;
 Simulate timeout retains the last values and disables actions until Refresh.
 The protocol advances logical ticks per command; it is a deterministic fixture,
 not a real clock or transport. The snapshot CLI accepts pixel coordinates and
-is usable without a GUI. Target `build/otablet.onx` writes the same PPM snapshot;
-it does not draw to the real device or read its mouse yet.
+is usable without a GUI. Target `build/otablet.onx` writes the same PPM snapshot by default. On OnyxOS:
 
-Existing applications primarily use ANSI framebuffer terminals. The kernel
-already provides framebuffer drivers and SYS_mouse_read, and Lua has a custom
-runtime build; neither is needed by this standalone portable core. A future
-OnyxOS frontend should adapt existing framebuffer/input facilities without
-introducing another kernel ABI. Lua can bind the same bounded API later.
+```sh
+otablet --device
+# Or load a declarative panel, then open the framebuffer:
+otablet --panel /path/to/energy.panel --device
+```
+
+The device frontend opens `/dev/fb0`, reads its existing `0x4600` geometry ioctl,
+and writes centered integer-scaled pixels through the framebuffer device. It
+supports RGB565 and 32-bit RGB, pitch padding and clipping. Existing syscall 86
+reads absolute mouse coordinates. Press and release the left button over the
+same action to invoke it once; right click exits. A white square marks the
+pointer. It occupies the framebuffer until exit; there is no window manager or
+background application lifetime. Unsupported/missing devices return failure.
+The compiler sibling checkout supplies the existing syscall header; no new
+kernel ABI or compiler changes are required. OnyxOS image assembly already
+includes every source application, including otablet. No bundled OC2R image is
+updated by building this app.
+
+`make -C tests/native/tablet test` includes a clearly isolated mock-kernel ABI
+test of the actual device frontend, including writes, pointer release and error
+cleanup. This test does not establish real framebuffer/mouse hardware operation.
+The RV64 snapshot path can run under `OnyxCompiller/tools/onx-run`; that runner
+does not provide framebuffer hardware. Lua remains deferred until real runtime
+instruction/memory limits and a restricted host API are integrated.
+
+## Declarative panels
+
+`presets/energy.panel` is a complete editable example. Each line is:
+
+```text
+kind x y width height binding action |PRINTABLE TEXT
+```
+
+Kinds are `label`, `button`, `progress`, `status`. Maximum 16 lines, 2048 bytes,
+47 printable ASCII text bytes per line and dimensions up to 4096. Load errors
+leave the existing view unchanged. Blank lines/comments are not supported.
+`--panel FILE` renders a PPM snapshot; add `--device` for OnyxOS graphics.
+Bindings in the local demo are 1: connection, 2: machine label, 3: energy percent,
+5: last command result. Action 1 toggles the local mock machine. These IDs are
+local bindings, not service addresses, permissions or radio credentials.
+Custom hosts can assign their own IDs through the portable C API.
 
 ## Make widgets
 
@@ -90,3 +127,16 @@ existing Ethernet/TCP/IP separately. Authentication/TLS must use a real approved
 transport stack, not custom cryptography. These interfaces implement none of
 that transport. A future Minecraft host can map mouse coordinates to pixels,
 forward actions, apply bounded samples, and paint via callbacks or upload RGB565.
+
+`service/session.h` defines a separate portable bounded asynchronous adapter
+contract for future trusted service transports. Up to eight requests can be
+pending. Enqueue means QUEUED; endpoint events explicitly advance ACCEPTED,
+RUNNING, COMPLETED or FAILED. Host ticks expire deadlines; disconnect cancels
+pending requests, and reconnect never replays them. IDs never wrap/reuse within
+a session, and late terminal events are rejected. Reinitializing a session
+requires the adapter to discard all prior connections and replies. Completed
+slots can be reused; retain external history if needed. Adapters must serialize
+callbacks, validate endpoint identities, enforce their own payload/rate bounds,
+and call tick before applying results. This interface supplies no network,
+authentication, TLS, discovery or live telemetry. The graphical fixture still
+uses its synchronous local backend, independently of this future contract.
