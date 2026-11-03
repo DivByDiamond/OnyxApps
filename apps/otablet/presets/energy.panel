@@ -1,0 +1,6 @@
+label 8 8 224 12 0 0 |ENERGY / MOCK DATA
+status 8 26 76 10 1 0 |
+label 88 26 144 10 2 0 |WAITING
+progress 8 44 224 12 3 0 |
+button 8 66 104 16 4 1 |TOGGLE MACHINE
+label 8 94 224 10 5 0 |NO ACTION

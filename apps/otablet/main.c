@@ -1,4 +1,6 @@
 #include "dashboard.h"
+#include "device/display.h"
+#include "config/panel.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +22,26 @@ int main(int argc, char **argv) {
     const char *path = argc > 1 ? argv[1] : "tablet.ppm";
     backend.ctx = 0; backend.fetch = fetch; backend.action = action;
     dashboard_init(&view);
+    if (argc > 2 && !strcmp(argv[1], "--panel")) {
+        FILE *f = fopen(argv[2], "rb");
+        char definition[2049];
+        unsigned long n;
+        if (!f) return 1;
+        n = fread(definition, 1, sizeof(definition) - 1, f);
+        definition[n] = 0;
+        if (fgetc(f) != EOF || ferror(f) || strlen(definition) != n ||
+            !ow_panel_load(&view, definition)) {
+            fclose(f); printf("otablet: invalid panel\n"); return 1;
+        }
+        fclose(f);
+        path = "tablet.ppm";
+    }
     dashboard_refresh(&view, &backend, 1);
+    if ((argc > 1 && !strcmp(argv[1], "--device")) ||
+        (argc > 3 && !strcmp(argv[3], "--device"))) {
+        printf("MOCK dashboard on /dev/fb0; right click exits\n");
+        return dashboard_device(&view, &backend) ? 0 : 1;
+    }
     if (argc > 3 && strcmp(argv[2], "--interactive")) {
         dashboard_click(&view, &backend, atoi(argv[2]), atoi(argv[3]), 1);
         dashboard_refresh(&view, &backend, 2);

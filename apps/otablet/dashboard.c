@@ -1,13 +1,15 @@
 #include "dashboard.h"
+#include "config/panel.h"
 #include <string.h>
 void dashboard_init(struct ow_view *v) {
     ow_init(v, 240, 112);
-    ow_add(v, OW_LABEL, 8, 8, 224, 12, 0, 0, "ONYX TABLET / MOCK DATA");
-    ow_add(v, OW_STATUS, 8, 26, 76, 10, 1, 0, "");
-    ow_add(v, OW_LABEL, 88, 26, 144, 10, 2, 0, "WAITING");
-    ow_add(v, OW_PROGRESS, 8, 44, 224, 12, 3, 0, "");
-    ow_add(v, OW_BUTTON, 8, 66, 104, 16, 4, 1, "TOGGLE MACHINE");
-    ow_add(v, OW_LABEL, 8, 94, 224, 10, 5, 0, "NO ACTION");
+    ow_panel_load(v,
+        "label 8 8 224 12 0 0 |ONYX TABLET / MOCK DATA\n"
+        "status 8 26 76 10 1 0 |\n"
+        "label 88 26 144 10 2 0 |WAITING\n"
+        "progress 8 44 224 12 3 0 |\n"
+        "button 8 66 104 16 4 1 |TOGGLE MACHINE\n"
+        "label 8 94 224 10 5 0 |NO ACTION\n");
 }
 int dashboard_refresh(struct ow_view *v, const struct dashboard_backend *b,
                       unsigned long now) {
