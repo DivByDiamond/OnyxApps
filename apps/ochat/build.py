@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build ochat with OnyxCC: app sources + lib/ochat + lib/oc2rpc (ring 1, RPC bus)."""
+"""Build ochat with OnyxCC: app sources + lib/ochat + lib/oc2rpc (RPC bus)."""
 import argparse
 import subprocess
 import sys
