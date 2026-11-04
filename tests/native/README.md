@@ -21,6 +21,15 @@ make clean
   the exact kernel formats, uptime parsing, permille edge cases (zero
   total, overflow clamp), `HH:MM:SS` formatting, history ring shifting,
   sparkline output (levels, padding, scaling).
+- **test_ochat** - `lib/ochat/{text,data,wire}`: ORA address validation
+  and alias resolution, text framing (UTF-8 validation, control/escape
+  stripping, 1024-byte bound), UUID text, history ring overflow, ping
+  statistics, wrapping, the bounded JSON scanner (malformed/deep input)
+  and radio RPC reply parsing/parameter building. Run under
+  ASan/UBSan during development.
+- **test_ochat_gui** - `apps/ochat-gui` model, actions and drawing against
+  a fake radio backend (contacts, unread, send errors, ping states,
+  slash commands, extreme histories).
 
 ## What is not covered here
 
@@ -34,5 +43,4 @@ then `run /bin/<app>`) and rely on CI for the real onyxcc build with
 - only pure modules are linked here; if a module needs I/O to be
   testable, split the logic out of it (SOLID) until the logic part is
   pure
-- keep this folder at max 4 files: the Makefile, this README and the
-  two test drivers
+- one test driver per module (test_<name>.c); keep this README current
