@@ -23,13 +23,24 @@ OTOP_INC := -I $(ROOT)/apps/otop
 OBROWSE_SRC := $(ROOT)/apps/obrowse/html/parser.c
 OBROWSE_INC := -I $(ROOT)/apps/obrowse
 
+OCHAT_SRC := $(wildcard $(ROOT)/lib/ochat/text/*.c $(ROOT)/lib/ochat/data/*.c $(ROOT)/lib/ochat/wire/*.c)
+OCHAT_INC := -I $(ROOT)/lib/ochat
+
+GUI := $(ROOT)/apps/ochat-gui
+TABLET := $(ROOT)/apps/otablet
+OCHAT_GUI_SRC := $(GUI)/gui/model.c $(GUI)/gui/actions.c $(GUI)/gui/draw.c $(GUI)/font/font.c \
+	$(TABLET)/core/state.c $(TABLET)/core/render.c $(TABLET)/graphics/paint.c $(TABLET)/graphics/raster.c
+OCHAT_GUI_INC := -I $(GUI) -I $(TABLET) -I $(ROOT)/lib/ochat
+
 .PHONY: test clean
 
-test: test_osnake test_otop test_obrowse
+test: test_osnake test_otop test_obrowse test_ochat test_ochat_gui
 	$(MAKE) -C tablet test
 	./test_osnake
 	./test_otop
 	./test_obrowse
+	./test_ochat
+	./test_ochat_gui
 
 test_osnake: test_osnake.c $(OSNAKE_SRC)
 	$(CC) $(CFLAGS) $(OSNAKE_INC) -o $@ test_osnake.c $(OSNAKE_SRC)
@@ -40,5 +51,10 @@ test_otop: test_otop.c $(OTOP_SRC)
 test_obrowse: test_obrowse.c $(OBROWSE_SRC)
 	$(CC) $(CFLAGS) $(OBROWSE_INC) -o $@ test_obrowse.c $(OBROWSE_SRC)
 
+test_ochat: test_ochat.c $(OCHAT_SRC)
+	$(CC) $(CFLAGS) $(OCHAT_INC) -o $@ test_ochat.c $(OCHAT_SRC)
+test_ochat_gui: test_ochat_gui.c $(OCHAT_GUI_SRC) $(OCHAT_SRC)
+	$(CC) $(CFLAGS) $(OCHAT_GUI_INC) -o $@ test_ochat_gui.c $(OCHAT_GUI_SRC) $(OCHAT_SRC)
+
 clean:
-	rm -f test_osnake test_otop test_obrowse
+	rm -f test_osnake test_otop test_obrowse test_ochat test_ochat_gui test_ochat_gui

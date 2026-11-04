@@ -10,6 +10,8 @@
 |-----|--------|------------|--------------|
 | osnake | wip | Змейка в ANSI-терминале (raw termios, non-blocking input, стены/сам себя, ускорение) | Чистая логика (`game/`) покрыта host-тестами; доделать UX/счёт и прогнать в QEMU |
 | otop | wip | Монитор системы в стиле btop: реальные данные из `/proc` (meminfo, load, cpuinfo, uptime) + свой heap через sbrk, спарклайн истории heap | Довести раскладку/обновление по таймеру; проверить на OC2R |
+| ochat | wip | CLI-чат по радио OC2R (ORA-адреса): send/recv/shell/who/ping/status через RPC-шину `/dev/hvc0` (`lib/ochat`, `lib/oc2rpc`) | Живой прогон с модом; подтвердить формат ответов (`OnyxOS/docs/dev/ochat.md`), `listRadioDevices` |
+| ochat-gui | wip | GUI-чат (framebuffer+мышь, тулкит otablet): список устройств, сообщения, ввод, индикатор ping | Живой прогон в QEMU; логика покрыта host-тестами |
 | ohttp | done | Минимальный HTTP/1.1 GET (`host[:port]/path` → файл; IPv4 или DNS-имя) | Убрать busy-spin `OHTTP_RECV_RETRIES` (больше не нужен после фикса `usleep`) |
 | obrowse | done | TUI-браузер: стадии A–D (fetch → разбор HTML → список ссылок → навигация → overlay ошибок) | Живой сквозной прогон URL → DNS → TCP → GET → render → link → back (P1 N2 в `OnyxKernel/todo.md`) |
 | otree | idea | Дерево каталогов (`otree [path]`), рекурсивный readdir + box-drawing | — |
