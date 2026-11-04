@@ -13,7 +13,7 @@
 ONYXCC ?= onyxcc
 ONYXCC_FILE := $(shell command -v "$(ONYXCC)" 2>/dev/null)
 APPS   := $(notdir $(wildcard apps/*))
-ROOT_CUSTOM_APPS := lua luac ochat ochat-gui
+ROOT_CUSTOM_APPS := lua luac
 CUSTOM_APPS := $(notdir $(patsubst %/build.py,%,$(wildcard apps/*/build.py)))
 C_APPS := $(filter-out $(CUSTOM_APPS),$(APPS))
 
@@ -30,7 +30,7 @@ $(foreach a,$(C_APPS),$(eval $(call APP_RULE,$(a))))
 
 # Lua and luac share the pinned source archive and custom builder. ochat and
 # ochat-gui use their own build.py to add lib/ochat, lib/oc2rpc (and the
-# otablet toolkit for ochat-gui); both run in ring 1 to open /dev/hvc0.
+# otablet toolkit for ochat-gui); both run in the user ring: /dev/hvc0 opens for uid 0 without ring 1.
 define CUSTOM_RULE
 build/$(1).onx: $$(shell find apps/$(1) apps/lua lib apps/otablet -type f) Makefile $$(ONYXCC_FILE)
 	python3 apps/$(1)/build.py --compiler "$$(ONYXCC)" --output "$$@" $$(if $$(filter $(1),$$(ROOT_CUSTOM_APPS)),--ring1,)

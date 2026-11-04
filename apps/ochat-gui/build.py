@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build ochat-gui with OnyxCC: app + lib/ochat + lib/oc2rpc + the otablet widget toolkit (ring 1)."""
+"""Build ochat-gui with OnyxCC: app + lib/ochat + lib/oc2rpc + the otablet widget toolkit."""
 import argparse
 import subprocess
 import sys
