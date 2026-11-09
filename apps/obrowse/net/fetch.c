@@ -8,8 +8,8 @@
  * Kernel quirks this client works around:
  *   - tcp_recv has no clean EOF; trust Content-Length, fall back to
  *     "read until EINVAL (slot gone)" for chunked responses.
- *   - usleep()/nanosleep() hangs on this kernel; busy-spin between
- *     recv attempts instead (OBROWSE_RECV_RETRIES budget).
+ *   - net_recv blocks in-kernel until data arrives (no busy-poll;
+ *     older kernels returned ENOENT, handled defensively below).
  *   - 8 KB header staging buffer is static (in .bss): USER_TOP
  *     proximity on the initial user stack pointer would push a stack
  *     array past the syscall user_ptr_ok check.
@@ -20,7 +20,6 @@
 #include <net.h>
 #include "../obrowse.h"
 
-#define OBROWSE_RECV_RETRIES 200000
 #define OBROWSE_MAX_HOST    256
 #define OBROWSE_MAX_PATH   1024
 #define OBROWSE_MAX_HEADER  8192
@@ -78,14 +77,16 @@ static int parse_target(const char *arg, char *host_out, size_t host_cap,
     return 0;
 }
 
-/* Busy-poll recv_wait: returns >0 bytes, 0 for "slot gone (done)", -1 err. */
+/* Blocking recv_wait: returns >0 bytes, 0 for EOF/slot gone, -1 err.
+ * net_recv sleeps in-kernel until the peer delivers, so no spin budget
+ * is needed; the ENOENT retry only covers pre-blocking kernels. */
 static long recv_wait(int conn_id, void *buf, size_t len) {
-    for (int attempt = 0; attempt < OBROWSE_RECV_RETRIES; attempt++) {
+    for (int attempt = 0; attempt < 3; attempt++) {
         long r = net_recv(conn_id, buf, len);
         if (r > 0) return r;
-        if (r < 0 && errno == EINVAL) return 0;
-        if (r < 0 && errno != ENOENT) return -1;
-        for (volatile int spin = 0; spin < 2000; spin++) {}
+        if (r == 0) return 0;               /* peer closed */
+        if (errno == EINVAL) return 0;      /* slot gone */
+        if (errno != ENOENT) return -1;
     }
     return -1;
 }
