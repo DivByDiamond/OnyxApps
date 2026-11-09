@@ -5,8 +5,13 @@
 #include <string.h>
 #include <stdarg.h>
 #include <sys/types.h>
+#include <termios.h>
 static int step, calls, writes, fail_mouse, invalid, rgb16, release_outside;
 static long offset;
+static int claims, releases, key_quit, claim_fails, restored;
+int mock_tcgetattr(int fd, struct termios *t) { assert(fd == 0); memset(t, 0, sizeof(*t)); t->c_lflag = ICANON | ECHO; return 0; }
+int mock_tcsetattr(int fd, int action, const struct termios *t) { assert(fd == 0); restored = (t->c_lflag & (ICANON | ECHO)) == (ICANON | ECHO); return 0; }
+ssize_t mock_read(int fd, void *buf, size_t n) { assert(fd == 0 && n == 1); if (!key_quit) return 0; *(char *)buf = key_quit; key_quit = 0; return 1; }
 static unsigned char frame[240 * 112 * 4];
 int mock_open(const char *name, int flags, ...) { assert(!strcmp(name, "/dev/fb0")); return 20; }
 int mock_close(int fd) { assert(fd == 20); return 0; }
@@ -18,7 +23,10 @@ ssize_t mock_write(int fd, const void *buf, size_t n) {
 }
 long _onyx_ioctl(int fd, long op, long arg) {
     struct ow_screen *s = (struct ow_screen *)arg;
-    assert(fd == 20 && op == 0x4600);
+    assert(fd == 20);
+    if (op == OW_FB_CLAIM_GRAPHICS) { claims++; return claim_fails ? -1 : 0; }
+    if (op == OW_FB_RELEASE_GRAPHICS) { releases++; return 0; }
+    assert(op == 0x4600);
     s->width = 240; s->height = 112; s->bpp = invalid ? 24 : rgb16 ? 16 : 32;
     s->pitch = rgb16 ? 484 : 960; s->size = s->pitch * s->height; return 0;
 }
@@ -100,5 +108,19 @@ int main(void) {
     assert(dashboard_device(&v, &b)); assert(calls == 2);
     invalid = 1; assert(!dashboard_device(&v, &b));
     invalid = 0; fail_mouse = 1; assert(!dashboard_device(&v, &b));
+    assert(claims == releases && restored);
+    fail_mouse = 0; step = 0; key_quit = 'q';
+    assert(dashboard_device(&v, &b) && restored);
+    step = 0; key_quit = 27;
+    assert(dashboard_device(&v, &b) && restored);
+    assert(claims == releases);
+    claim_fails = 1;
+    assert(!dashboard_device(&v, &b));
+    assert(claims == releases + 1);
+    dashboard_local(&v, &b, 1);
+    assert(dashboard_refresh(&v, &b, 1));
+    assert(!strcmp(v.widgets[0].text, "ONYX TABLET / LOCAL"));
+    assert(dashboard_click(&v, &b, 10, 70, 1) == 2);
+    assert(dashboard_refresh(&v, &b, 1) && v.widgets[3].value == 1);
     return 0;
 }

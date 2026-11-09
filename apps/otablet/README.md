@@ -140,3 +140,19 @@ callbacks, validate endpoint identities, enforce their own payload/rate bounds,
 and call tick before applying results. This interface supplies no network,
 authentication, TLS, discovery or live telemetry. The graphical fixture still
 uses its synchronous local backend, independently of this future contract.
+
+## Tablet device mode
+
+Run `otablet --device` from the guest console, then select the tablet screen.
+This mode displays real monotonic uptime and a local click counter. ADD CLICK
+increments that counter; the progress bar shows the counter modulo 101. It does
+not report remote energy or radio telemetry. Snapshot/demo modes retain their
+explicit mock fixture.
+
+The framebuffer must support GET_INFO (0x4600), process-owned graphics claim
+(0x46f0), and release (0x46f1). Device mode accepts RGB565 little endian and
+32-bit RGB displays, and centers its 240x112 canvas. On the 256x160 tablet the
+canvas starts at (8,24). Pointer syscall 86 supplies absolute pixel coordinates.
+Press Q, Escape or the right mouse button to return to the console. All normal
+and failed device exits restore terminal settings and release the console;
+the kernel also releases ownership when the process exits.
