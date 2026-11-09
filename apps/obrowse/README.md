@@ -1,4 +1,4 @@
- ## Kernel limits inherited from `ohttp`
+ ## Kernel limits
  
  - Plain HTTP only. No TLS, no `listen/accept`.
 -- `tcp_recv` has no clean EOF signal (returns `ENOENT` for "no data"
@@ -9,9 +9,7 @@
   see OnyxKernel/todo.md). `obrowse/net/fetch.c` reads until `Ok(0)`
   for responses without `Content-Length` (chunked/legacy) and falls
   back to "read until EINVAL (slot gone)" only as a safety net for
-  pre-fix kernels. `ohttp` (older sibling) still trusts
-  `Content-Length` for the body length, but that workaround is no
-  longer required.
+  pre-fix kernels.
  - `usleep()`/`nanosleep()` hangs on this kernel (confirmed live,
    see `OnyxKernel/todo.md`); `net/fetch.c` busy-spins between recv
    attempts.

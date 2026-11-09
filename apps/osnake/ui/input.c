@@ -31,7 +31,7 @@ void term_raw_off(void) {
     }
 }
 
-/* Real framebuffer grid from TIOCGWINSZ (same probe as oed/osysmon). */
+/* Real framebuffer grid from TIOCGWINSZ (same probe as vim/otop). */
 void get_size(void) {
     unsigned short ws[4] = {24, 80, 0, 0};
     if (_onyx_ioctl(0, 0x5413, (long)ws) == 0 && ws[0] > 2 && ws[1] > 8) {

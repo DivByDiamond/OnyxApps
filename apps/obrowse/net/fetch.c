@@ -1,12 +1,11 @@
 /*
  * net/fetch.c - HTTP/1.1 GET for obrowse.
  *
- * Reuses the ohttp patterns (apps/ohttp/net/{request,connect,response}.c)
- * but writes the body into a single in-memory buffer instead of a file,
- * so the obrowse TUI can render it directly. Plain HTTP over IPv4 (or
- * DNS-via-net_resolve); no TLS, no listen/accept (kernel limits).
+ * Writes the body into a single in-memory buffer so the obrowse TUI can
+ * render it directly. Plain HTTP over IPv4 (or DNS-via-net_resolve);
+ * no TLS, no listen/accept (kernel limits).
  *
- * Same kernel quirks ohttp works around (see apps/ohttp/README.md):
+ * Kernel quirks this client works around:
  *   - tcp_recv has no clean EOF; trust Content-Length, fall back to
  *     "read until EINVAL (slot gone)" for chunked responses.
  *   - usleep()/nanosleep() hangs on this kernel; busy-spin between

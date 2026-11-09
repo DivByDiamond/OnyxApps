@@ -8,6 +8,14 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Host tests for the pure-logic modules (parsers, game rules, chat model).
+  native-tests:
+    name: native tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: make -C tests/native test
+
   # Fast feedback: gcc syntax-only pass of every app against the libonyxc
   # freestanding headers (OnyxCompiller). Does not need the toolchain.
   syntax-check:
@@ -16,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [vim, oed, osysmon, osnake, otop, ohttp]
+        app: [vim, osnake, otop, mux, obrowse]
     steps:
       - uses: actions/checkout@v6
 
@@ -45,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [vim, oed, osysmon, osnake, otop, ohttp, lua, luac]
+        app: [vim, osnake, otop, mux, obrowse, otablet, ochat, ochat-gui, lua, luac]
     steps:
       - uses: actions/checkout@v6
 
