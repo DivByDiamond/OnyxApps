@@ -39,7 +39,9 @@ int main(int argc, char **argv) {
     dashboard_refresh(&view, &backend, 1);
     if ((argc > 1 && !strcmp(argv[1], "--device")) ||
         (argc > 3 && !strcmp(argv[3], "--device"))) {
-        printf("MOCK dashboard on /dev/fb0; right click exits\n");
+        dashboard_local(&view, &backend, strcmp(argv[1], "--panel") != 0);
+        dashboard_refresh(&view, &backend, 1);
+        printf("LOCAL dashboard on /dev/fb0; Q, Esc or right click exits\n");
         return dashboard_device(&view, &backend) ? 0 : 1;
     }
     if (argc > 3 && strcmp(argv[2], "--interactive")) {
