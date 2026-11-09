@@ -1,5 +1,5 @@
 #include "../dashboard.h"
-/* Small demo-only 5x7 uppercase font. Production hosts inject their own font. */
+/* Small 5x7 device/demo font. Other hosts may inject their own font. */
 static const unsigned char letters[26][7] = {
  {14,17,17,31,17,17,17},{30,17,17,30,17,17,30},
  {14,17,16,16,16,17,14},{30,17,17,17,17,17,30},
@@ -15,9 +15,18 @@ static const unsigned char letters[26][7] = {
  {17,17,17,21,21,21,10},{17,17,10,4,10,17,17},
  {17,17,10,4,4,4,4},{31,1,2,4,8,16,31}
 };
+static const unsigned char digits[10][7] = {
+ {14,17,19,21,25,17,14},{4,12,4,4,4,4,14},
+ {14,17,1,2,4,8,31},{30,1,1,14,1,1,30},
+ {2,6,10,18,31,2,2},{31,16,16,30,1,1,30},
+ {14,16,16,30,17,17,14},{31,1,2,4,8,8,8},
+ {14,17,17,14,17,17,14},{14,17,17,15,1,1,14}
+};
 unsigned int demo_glyph(unsigned char c, int row) {
     if (row < 0 || row > 6) return 0;
     if (c >= 'a' && c <= 'z') c -= 32;
+    if (c >= '0' && c <= '9') return digits[c - '0'][row];
+    if (c == ':') return row == 2 || row == 5 ? 4 : 0;
     if (c >= 'A' && c <= 'Z') return letters[c - 'A'][row];
     if (c == '/') return 1u << row % 5;
     if (c == '-') return row == 3 ? 31 : 0;
