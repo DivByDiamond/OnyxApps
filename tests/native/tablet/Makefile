@@ -2,13 +2,14 @@ CC ?= cc
 CFLAGS ?= -std=c99 -Wall -Wextra -Werror -Wno-unused-parameter -O2
 APP := ../../../apps/otablet
 CORE := $(APP)/core/state.c $(APP)/core/render.c $(APP)/graphics/paint.c $(APP)/graphics/raster.c $(APP)/dashboard.c $(APP)/config/panel.c $(APP)/device/geometry.c $(APP)/service/session.c $(APP)/device/local.c
+DESKTOP := $(wildcard $(APP)/desktop/*.c)
 .PHONY: test clean
-test: check demo device-test portable-test
+test: check demo device-test portable-test desktop-test
 	./check
 	python3 protocol.py
 check: test.c $(CORE)
 	$(CC) $(CFLAGS) -I$(APP) -o $@ $^
-demo: $(APP)/main.c $(CORE) $(APP)/host/font.c $(APP)/host/snapshot.c $(APP)/device/frontend.c
+demo: $(APP)/main.c $(CORE) $(DESKTOP) $(APP)/host/font.c $(APP)/host/snapshot.c $(APP)/device/frontend.c
 	$(CC) $(CFLAGS) -I$(APP) -o $@ $^
 clean:
 	rm -f check demo
@@ -28,3 +29,8 @@ portable-test:
 target-test:
 	$(ONYXCC) -I$(APP) -o /tmp/otablet-portable.onx portable.c $(CORE)
 	$(ONXRUN) /tmp/otablet-portable.onx
+
+.PHONY: desktop-test
+desktop-test:
+	$(CC) $(CFLAGS) -I$(APP) -o /tmp/onyx-desktop-test desktop.c $(DESKTOP) $(APP)/host/font.c
+	/tmp/onyx-desktop-test

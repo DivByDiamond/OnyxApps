@@ -14,6 +14,9 @@ ONYXCC ?= onyxcc
 ONYXCC_FILE := $(shell command -v "$(ONYXCC)" 2>/dev/null)
 APPS   := $(notdir $(wildcard apps/*))
 ROOT_CUSTOM_APPS := lua luac
+# otablet persists notes under /users, and the kernel only lets ring 1 create
+# files; build it as a root-ring system app like osh and login.
+ROOT_APPS := otablet
 CUSTOM_APPS := $(notdir $(patsubst %/build.py,%,$(wildcard apps/*/build.py)))
 C_APPS := $(filter-out $(CUSTOM_APPS),$(APPS))
 
@@ -24,7 +27,7 @@ all: $(APPS:%=build/%.onx)
 define APP_RULE
 build/$(1).onx: $$(shell find apps/$(1) -name '*.c')
 	@mkdir -p build
-	$$(ONYXCC) -I apps/$(1) -o $$@ $$^
+	$$(ONYXCC) $$(if $$(filter $(1),$$(ROOT_APPS)),--ring1) -I apps/$(1) -o $$@ $$^
 endef
 $(foreach a,$(C_APPS),$(eval $(call APP_RULE,$(a))))
 
