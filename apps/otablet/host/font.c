@@ -29,6 +29,12 @@ unsigned int demo_glyph(unsigned char c, int row) {
     if (c == ':') return row == 2 || row == 5 ? 4 : 0;
     if (c >= 'A' && c <= 'Z') return letters[c - 'A'][row];
     if (c == '/') return 1u << row % 5;
+    if (c == '.') return row == 6 ? 4 : 0;
+    if (c == ',') return row == 5 ? 4 : row == 6 ? 8 : 0;
+    if (c == '_') return row == 6 ? 31 : 0;
+    if (c == '!') return row < 4 || row == 6 ? 4 : 0;
+    if (c == '?') return row == 0 ? 14 : row == 1 ? 17 : row == 2 ? 2 : row == 3 || row == 6 ? 4 : 0;
+    if (c == '+') return row == 3 ? 31 : row > 0 && row < 6 ? 4 : 0;
     if (c == '-') return row == 3 ? 31 : 0;
     return 0;
 }

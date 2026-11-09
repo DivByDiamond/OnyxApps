@@ -1,5 +1,6 @@
 #include "dashboard.h"
 #include "device/display.h"
+#include "desktop/desktop.h"
 #include "config/panel.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,8 +42,8 @@ int main(int argc, char **argv) {
         (argc > 3 && !strcmp(argv[3], "--device"))) {
         dashboard_local(&view, &backend, strcmp(argv[1], "--panel") != 0);
         dashboard_refresh(&view, &backend, 1);
-        printf("LOCAL dashboard on /dev/fb0; Q, Esc or right click exits\n");
-        return dashboard_device(&view, &backend) ? 0 : 1;
+        printf("Onyx desktop on /dev/fb0; Shell returns to the console\n");
+        return desktop_device() ? 0 : 1;
     }
     if (argc > 3 && strcmp(argv[2], "--interactive")) {
         dashboard_click(&view, &backend, atoi(argv[2]), atoi(argv[3]), 1);
