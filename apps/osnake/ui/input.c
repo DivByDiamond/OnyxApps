@@ -9,6 +9,7 @@
 
 int screen_rows = 24;
 int screen_cols = 80;
+int compact_layout = 0;
 
 static struct termios orig_termios;
 static int raw_on = 0;
@@ -40,6 +41,22 @@ void get_size(void) {
     }
     if (screen_rows < 5) screen_rows = 5;
     if (screen_cols < 20) screen_cols = 20;
+
+    /* The normal frame needs a header, the 16-row board, a status line and
+     * a footer. Small framebuffer consoles (the 256x160 tablet is 32x10
+     * cells) fall back to a compact header/board-only layout. */
+    compact_layout = screen_rows < GRID_H + 6 || screen_cols < GRID_W + 4;
+    if (compact_layout) {
+        board_w = screen_cols - 2;
+        board_h = screen_rows - 3;
+        if (board_w > GRID_W) board_w = GRID_W;
+        if (board_h > GRID_H) board_h = GRID_H;
+        if (board_w < 10) board_w = 10;
+        if (board_h < 3) board_h = 3;
+    } else {
+        board_w = GRID_W;
+        board_h = GRID_H;
+    }
 }
 
 /* Read one raw byte without blocking; 0 = nothing available. */

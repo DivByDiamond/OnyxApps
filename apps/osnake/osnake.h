@@ -78,5 +78,10 @@ void render_over(struct snake *s, int won);
 
 extern int screen_rows;
 extern int screen_cols;
+/* Runtime board size: the default 32x16 grid is used when the terminal is
+ * large enough, otherwise get_size() shrinks it to the visible console. */
+extern int board_w;
+extern int board_h;
+extern int compact_layout;
 
 #endif

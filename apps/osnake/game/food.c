@@ -26,12 +26,12 @@ static int on_snake(struct snake *s, int x, int y) {
 int game_food_spawn(struct snake *s) {
     int x, y, tries;
 
-    if (s->len >= GRID_W * GRID_H) return 0;
+    if (s->len >= board_w * board_h) return 0;
 
     /* Random probes first: cheap and uniform while the board is sparse. */
     for (tries = 0; tries < 4096; tries++) {
-        x = (int)(rng_next(&s->rng) % GRID_W);
-        y = (int)(rng_next(&s->rng) % GRID_H);
+        x = (int)(rng_next(&s->rng) % board_w);
+        y = (int)(rng_next(&s->rng) % board_h);
         if (!on_snake(s, x, y)) {
             s->food.x = x;
             s->food.y = y;
@@ -40,8 +40,8 @@ int game_food_spawn(struct snake *s) {
     }
 
     /* Board is nearly full: fall back to a linear scan. */
-    for (y = 0; y < GRID_H; y++) {
-        for (x = 0; x < GRID_W; x++) {
+    for (y = 0; y < board_h; y++) {
+        for (x = 0; x < board_w; x++) {
             if (!on_snake(s, x, y)) {
                 s->food.x = x;
                 s->food.y = y;

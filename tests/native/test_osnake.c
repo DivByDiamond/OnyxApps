@@ -134,6 +134,32 @@ static void test_rng(void) {
     CHECK(ra == rb);
 }
 
+static void test_small_board(void) {
+    struct snake s;
+
+    printf("small board follows the terminal size:\n");
+    board_w = 10;
+    board_h = 4;
+    game_reset(&s, 3);
+    CHECK(s.body[0].x >= 0 && s.body[0].x < board_w);
+    CHECK(s.body[0].y >= 0 && s.body[0].y < board_h);
+    CHECK(s.food.x >= 0 && s.food.x < board_w);
+    CHECK(s.food.y >= 0 && s.food.y < board_h);
+
+    s.body[0].x = board_w - 1;
+    s.body[0].y = 1;
+    s.len = 1;
+    s.dir = DIR_RIGHT;
+    s.pending_dir = DIR_RIGHT;
+    s.food.x = 0;
+    s.food.y = 0;
+    CHECK(game_step(&s) == 0);
+    CHECK(s.alive == 0);
+
+    board_w = GRID_W;
+    board_h = GRID_H;
+}
+
 static void test_fuzz(void) {
     struct snake s;
     int i, j, ok = 1;
@@ -163,6 +189,7 @@ int main(void) {
     test_self_collision();
     test_growth();
     test_full_board();
+    test_small_board();
     test_rng();
     test_fuzz();
     printf("\ntest_osnake: %d checks, %d failures\n", checks, failures);
