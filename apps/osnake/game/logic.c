@@ -1,18 +1,22 @@
 /*
  * logic.c - pure game state transitions for osnake, no I/O.
  *
- * The board is a GRID_W x GRID_H cell grid; walls kill, touching the
+ * The board is a board_w x board_h cell grid (32x16 by default); walls kill, touching the
  * snake body kills, eating food grows the snake and adds 10 points.
  * All functions only touch the passed struct, so they run unchanged on
  * the host (tests/native) and under onyxcc on OnyxOS.
  */
 #include "osnake.h"
 
+/* Runtime board size; input.c shrinks it to the terminal when needed. */
+int board_w = GRID_W;
+int board_h = GRID_H;
+
 /* Place the snake in the middle of the board, heading right. */
 void game_reset(struct snake *s, unsigned long seed) {
     int i;
-    int cy = GRID_H / 2;
-    int cx = GRID_W / 2;
+    int cy = board_h / 2;
+    int cx = board_w / 2;
 
     memset(s, 0, sizeof(*s));
     s->rng = seed ? seed : 1;
@@ -61,7 +65,7 @@ int game_step(struct snake *s) {
     else hx++;
 
     /* Wall hit ends the run. */
-    if (hx < 0 || hx >= GRID_W || hy < 0 || hy >= GRID_H) {
+    if (hx < 0 || hx >= board_w || hy < 0 || hy >= board_h) {
         s->alive = 0;
         return 0;
     }
