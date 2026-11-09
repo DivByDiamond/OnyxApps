@@ -1,5 +1,6 @@
 #include "device/display.h"
 #include "config/panel.h"
+#include "graphics/raster.h"
 #include "service/session.h"
 #include <assert.h>
 #include <string.h>
@@ -122,5 +123,22 @@ int main(void) {
     assert(!strcmp(v.widgets[0].text, "ONYX TABLET / LOCAL"));
     assert(dashboard_click(&v, &b, 10, 70, 1) == 2);
     assert(dashboard_refresh(&v, &b, 1) && v.widgets[3].value == 1);
+    /* The actual local counter glyph must paint, not disappear in the font. */
+    {
+        unsigned short pixels[240 * 112] = {0};
+        struct ow_raster raster;
+        int digit, row, bits, column;
+        for (digit = '0'; digit <= '9'; digit++) {
+            bits = 0;
+            for (row = 0; row < 7; row++) bits |= demo_glyph(digit, row);
+            assert(bits != 0);
+        }
+        assert(demo_glyph(':', 2) && demo_glyph(':', 5));
+        assert(strlen(v.widgets[2].text) * 6 - 1 <= (size_t)v.widgets[2].w);
+        column = v.widgets[2].x + ((int)strlen(v.widgets[2].text) - 1) * 6 + 2;
+        assert(ow_raster_init(&raster, pixels, 240, 112, 240, demo_glyph));
+        ow_raster_paint(&v, &raster);
+        assert(pixels[v.widgets[2].y * 240 + column] == 0xffff);
+    }
     return 0;
 }
