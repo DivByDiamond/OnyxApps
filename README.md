@@ -68,9 +68,14 @@ artifact-sync overhead. The system components stay in their own repos:
 | App | Source | Docs | Description |
 |-----|--------|------|-------------|
 | **vim** | [apps/vim](apps/vim) | [apps/vim/README.md](apps/vim/README.md) | Modal text editor (vim-inspired) |
-| **oed** | [apps/oed](apps/oed) | [apps/oed/README.md](apps/oed/README.md) | Full-screen text editor (nano-style) |
 | **lua** | [apps/lua](apps/lua) | [apps/lua/README.md](apps/lua/README.md) | Standard Lua 5.5.1 interpreter |
 | **luac** | [apps/luac](apps/luac) | [apps/luac/README.md](apps/luac/README.md) | Standard Lua 5.5.1 bytecode compiler |
+| **mux** | [apps/mux](apps/mux) | [apps/mux/README.md](apps/mux/README.md) | PTY terminal multiplexer |
+| **otop** | [apps/otop](apps/otop) | [apps/otop/README.md](apps/otop/README.md) | System monitor reading `/proc` |
+| **osnake** | [apps/osnake](apps/osnake) | [apps/osnake/README.md](apps/osnake/README.md) | Snake in the ANSI terminal |
+| **obrowse** | [apps/obrowse](apps/obrowse) | [apps/obrowse/README.md](apps/obrowse/README.md) | Text-mode HTTP page viewer (experimental) |
+| **ochat**, **ochat-gui** | [apps/ochat](apps/ochat), [apps/ochat-gui](apps/ochat-gui) | - | OC2R radio chat, CLI and framebuffer GUI |
+| **otablet** | [apps/otablet](apps/otablet) | [apps/otablet/README.md](apps/otablet/README.md) | Framebuffer UI toolkit and tablet demo |
 
 Full documentation lives in **each app's own `README.md`**; this file covers
 the monorepo only.
