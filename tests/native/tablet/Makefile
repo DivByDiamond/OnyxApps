@@ -15,9 +15,15 @@ clean:
 	rm -f check demo
 
 DEVICE_FLAGS := -D__onyx__ -Dopen=mock_open -Dclose=mock_close -Dwrite=mock_write -Dlseek=mock_lseek -Dusleep=mock_usleep -Dread=mock_read -Dtcgetattr=mock_tcgetattr -Dtcsetattr=mock_tcsetattr -Dcfmakeraw_apply=cfmakeraw
+# The device test replaces libc entry points by name (-Dopen=mock_open, ...).
+# Distributions whose gcc enables _FORTIFY_SOURCE by default (Ubuntu at -O1+)
+# get glibc's fortified declarations instead, which bypass those macros: the
+# real open("/dev/fb0") runs, fails, and dashboard_device bails out early.
+# Fortify must be off for this mocked build.
+DEVICE_FORTIFY := -U_FORTIFY_SOURCE -DFORTIFY_SOURCE=0
 .PHONY: device-test
 device-test:
-	$(CC) $(CFLAGS) -D_DEFAULT_SOURCE $(DEVICE_FLAGS) -include device/mock.h -I$(APP) -o /tmp/otablet-device-test device/test.c $(CORE) $(APP)/host/font.c $(APP)/device/frontend.c
+	$(CC) $(CFLAGS) $(DEVICE_FORTIFY) -D_DEFAULT_SOURCE $(DEVICE_FLAGS) -include device/mock.h -I$(APP) -o /tmp/otablet-device-test device/test.c $(CORE) $(APP)/host/font.c $(APP)/device/frontend.c
 	/tmp/otablet-device-test
 
 ONYXCC ?= ../../../../OnyxCompiller/onyxcc
