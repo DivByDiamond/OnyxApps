@@ -1,4 +1,7 @@
 test_osnake
 test_otop
+test_obrowse
+test_ochat
+test_ochat_gui
 patches/
 build/

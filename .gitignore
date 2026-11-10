@@ -2,6 +2,8 @@ build/
 *.onx
 *.o
 tests/native/test_*
+# ...but the test *sources* must stay tracked (the binaries above are ignored)
+!tests/native/test_*.c
 
 .claude/
 
