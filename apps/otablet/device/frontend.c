@@ -6,7 +6,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
+/* Target builds take the real ABI header from the sibling OnyxCompiller
+ * checkout. The host device test mocks those syscalls and pre-defines the
+ * header guard (tests/native/tablet/device/mock.h), so skip the include --
+ * it also lets the test build without the sibling repository present. */
+#ifndef ONYX_SYSCALLS_H
 #include "../../../../OnyxCompiller/include/sys/syscalls.h"
+#endif
 /* Kernel repr(C) MouseEvent is six bytes; reserve eight for ABI compatibility. */
 struct pointer { unsigned short x, y; unsigned char buttons, pad; unsigned short reserved; };
 static unsigned short pixels[240 * 112];
