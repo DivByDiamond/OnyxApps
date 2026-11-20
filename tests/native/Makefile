@@ -23,6 +23,9 @@ OTOP_INC := -I $(ROOT)/apps/otop
 OBROWSE_SRC := $(ROOT)/apps/obrowse/html/parser.c
 OBROWSE_INC := -I $(ROOT)/apps/obrowse
 
+JSTEST_SRC := $(ROOT)/apps/jstest/events.c
+JSTEST_INC := -I $(ROOT)/apps/jstest
+
 OCHAT_SRC := $(wildcard $(ROOT)/lib/ochat/text/*.c $(ROOT)/lib/ochat/data/*.c $(ROOT)/lib/ochat/wire/*.c)
 OCHAT_INC := -I $(ROOT)/lib/ochat
 
@@ -34,13 +37,14 @@ OCHAT_GUI_INC := -I $(GUI) -I $(TABLET) -I $(ROOT)/lib/ochat
 
 .PHONY: test clean
 
-test: test_osnake test_otop test_obrowse test_ochat test_ochat_gui
+test: test_osnake test_otop test_obrowse test_ochat test_ochat_gui test_jstest
 	$(MAKE) -C tablet test
 	./test_osnake
 	./test_otop
 	./test_obrowse
 	./test_ochat
 	./test_ochat_gui
+	./test_jstest
 
 test_osnake: test_osnake.c $(OSNAKE_SRC)
 	$(CC) $(CFLAGS) $(OSNAKE_INC) -o $@ test_osnake.c $(OSNAKE_SRC)
@@ -56,5 +60,8 @@ test_ochat: test_ochat.c $(OCHAT_SRC)
 test_ochat_gui: test_ochat_gui.c $(OCHAT_GUI_SRC) $(OCHAT_SRC)
 	$(CC) $(CFLAGS) $(OCHAT_GUI_INC) -o $@ test_ochat_gui.c $(OCHAT_GUI_SRC) $(OCHAT_SRC)
 
+test_jstest: test_jstest.c $(JSTEST_SRC)
+	$(CC) $(CFLAGS) $(JSTEST_INC) -o $@ test_jstest.c $(JSTEST_SRC)
+
 clean:
-	rm -f test_osnake test_otop test_obrowse test_ochat test_ochat_gui test_ochat_gui
+	rm -f test_osnake test_otop test_obrowse test_ochat test_ochat_gui test_jstest test_ochat_gui

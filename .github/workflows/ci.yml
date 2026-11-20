@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [vim, osnake, otop, mux, obrowse]
+        app: [vim, osnake, otop, mux, obrowse, jstest]
     steps:
       - uses: actions/checkout@v6
 
@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [vim, osnake, otop, mux, obrowse, otablet, ochat, ochat-gui, lua, luac]
+        app: [vim, osnake, otop, mux, obrowse, jstest, otablet, ochat, ochat-gui, lua, luac]
     steps:
       - uses: actions/checkout@v6
 

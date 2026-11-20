@@ -74,6 +74,7 @@ artifact-sync overhead. The system components stay in their own repos:
 | **otop** | [apps/otop](apps/otop) | [apps/otop/README.md](apps/otop/README.md) | System monitor reading `/proc` |
 | **osnake** | [apps/osnake](apps/osnake) | [apps/osnake/README.md](apps/osnake/README.md) | Snake in the ANSI terminal |
 | **obrowse** | [apps/obrowse](apps/obrowse) | [apps/obrowse/README.md](apps/obrowse/README.md) | Text-mode HTTP page viewer (experimental) |
+| **jstest** | [apps/jstest](apps/jstest) | [apps/jstest/README.md](apps/jstest/README.md) | `/dev/jsN` joystick event diagnostic |
 | **ochat**, **ochat-gui** | [apps/ochat](apps/ochat), [apps/ochat-gui](apps/ochat-gui) | - | OC2R radio chat, CLI and framebuffer GUI |
 | **otablet** | [apps/otablet](apps/otablet) | [apps/otablet/README.md](apps/otablet/README.md) | Framebuffer UI toolkit and tablet demo |
 

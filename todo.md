@@ -1,6 +1,6 @@
 # OnyxApps — backlog
 
-> Актуально на 2026-10-25. Правила: ≤4 файла на папку, ≤200 строк на файл,
+> Актуально на 2026-11-20. Правила: ≤4 файла на папку, ≤200 строк на файл,
 > KISS/DRY/SOLID, C99, самодостаточная папка `apps/<name>/`.
 > Статусы: `idea` → `wip` → `done` (в CI-сборке) → `released`.
 
@@ -13,6 +13,7 @@
 | ochat | wip | CLI-чат по радио OC2R (ORA-адреса): send/recv/shell/who/ping/status через RPC-шину `/dev/hvc0` (`lib/ochat`, `lib/oc2rpc`) | Живой прогон с модом; подтвердить формат ответов (`OnyxOS/docs/dev/ochat.md`), `listRadioDevices` |
 | ochat-gui | wip | GUI-чат (framebuffer+мышь, тулкит otablet): список устройств, сообщения, ввод, индикатор ping | Живой прогон в QEMU; логика покрыта host-тестами |
 | obrowse | done | TUI-браузер: стадии A–D (fetch → разбор HTML → список ссылок → навигация → overlay ошибок) | Живой сквозной прогон URL → DNS → TCP → GET → render → link → back (P1 N2 в `OnyxKernel/todo.md`) |
+| jstest | wip | Диагностика джойстика `/dev/jsN` (joydev-рекорды 8 байт: init-бёрст + live-события, EAGAIN → retry 10 мс); декод покрыт host-тестом `test_jstest` | Живой прогон в QEMU с HID-джойстиком (`/dev/js0` из OnyxKernel feat/usb-hid-joystick) |
 | ofetch | idea | Аналог fastfetch: ASCII-лого Onyx + версия ядра, uptime, память, CPU, hart'ы, разрешение фреймбуфера из `/proc` и `/dev/fb0` | — |
 | otree | idea | Дерево каталогов (`otree [path]`), рекурсивный readdir + box-drawing | — |
 | ocalc | idea | Инфиксный калькулятор `+-*/%` и скобки, `math.h` | — |

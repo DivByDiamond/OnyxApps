@@ -30,6 +30,10 @@ make clean
 - **test_ochat_gui** - `apps/ochat-gui` model, actions and drawing against
   a fake radio backend (contacts, unread, send errors, ping states,
   slash commands, extreme histories).
+- **test_jstest** - `apps/jstest/events.c` (pure C99, no I/O): the
+  joydev wire decode (little-endian time/value, i16 sign), button and
+  axis records, the init bit 0x80 in both, the one-line output format,
+  rejection of unknown type bits.
 
 ## What is not covered here
 
