@@ -1,6 +1,9 @@
 # OnyxApps - build all apps with OnyxCC.
 #
 #   make            build every app into build/
+#   make build      alias for the default target (unified ecosystem
+#                   entry point)
+#   make test       native host tests, no onyxcc or RISC-V toolchain
 #   make vim        build one app
 #   ONYXCC=... make    custom compiler path
 #
@@ -20,9 +23,17 @@ ROOT_APPS := otablet
 CUSTOM_APPS := $(notdir $(patsubst %/build.py,%,$(wildcard apps/*/build.py)))
 C_APPS := $(filter-out $(CUSTOM_APPS),$(APPS))
 
-.PHONY: all $(APPS) clean
+.PHONY: all build test $(APPS) clean
 
 all: $(APPS:%=build/%.onx)
+
+# Unified ecosystem entry points (make build / make test in every repo).
+# test delegates to tests/native: pure-logic host tests that need only
+# gcc. Full .onx builds and ONX1 validation stay in CI.
+build: all
+
+test:
+	$(MAKE) -C tests/native test
 
 define APP_RULE
 build/$(1).onx: $$(shell find apps/$(1) -name '*.c')
