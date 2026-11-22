@@ -27,112 +27,20 @@
 #define CTRL_A 0x01
 #define READ_CHUNK 256
 
-
-static struct termios g_orig;
-static int g_raw = 0;
-
-static void raw_on(void) {
-    struct termios t;
-    if (tcgetattr(0, &g_orig) != 0) return;
-    t = g_orig;
-    cfmakeraw_apply(&t);
-    t.c_cc[VMIN] = 0;
-    t.c_cc[VTIME] = 0;
-    if (tcsetattr(0, 0, &t) == 0) g_raw = 1;
-}
-
-static void raw_off(void) {
-    if (g_raw) {
-        tcsetattr(0, 0, &g_orig);
-        g_raw = 0;
-    }
-}
-
-static int session_count(void) {
-    int n = 0;
-    for (int i = 0; i < MUX_MAX_SESSIONS; i++) {
-        if (g_sessions[i].used) n++;
-    }
-    return n;
-}
-
-static int switch_relative(int active, int step) {
-    for (int k = 1; k <= MUX_MAX_SESSIONS; k++) {
-        int idx = (active + step * k + MUX_MAX_SESSIONS * 8) % MUX_MAX_SESSIONS;
-        if (g_sessions[idx].used) return idx;
-    }
-    return active;
-}
-
-/* Helper mode: mux --bind <pts-path> <program>.
- *
- * Binds the slave side to fds 0-2 and execs the session command. Runs in
- * the spawned child, so the multiplexer itself never owns the child's
- * address space or fd table. */
-static int bind_and_exec(char **argv) {
-    int s = (int)_onyx_open(argv[2], 2 /* O_RDWR */, 0);
-    if (s < 0) return 1;
-    _onyx_fcntl(s, 0x4f01 /* F_BIND_STDIO */, 0);
-    _onyx_fcntl(s, 0x4f01, 1);
-    _onyx_fcntl(s, 0x4f01, 2);
-    if (s > 2) _onyx_close(s);
-    char *cargv[2];
-    cargv[0] = argv[3];
-    cargv[1] = 0;
-    _onyx_exec(argv[3], cargv);
-    return 127;
-}
-
-/* One ^a command. Returns 1 when the multiplexer should quit. */
-static int command(unsigned char c, int *active, int *rows, int *cols,
-                   const char *prog) {
-    switch (c) {
-        case 'c': {
-            char title[8];
-            int n = session_count() + 1;
-            title[0] = 's';
-            title[1] = (char)('0' + (n % 10));
-            title[2] = 0;
-            int idx = mux_session_open(title, prog, *rows, *cols);
-            if (idx < 0) {
-                mux_help_line();
-                return 0;
-            }
-            *active = idx;
-            mux_redraw_active(*active, *rows, *cols);
-            return 0;
-        }
-        case 'n': *active = switch_relative(*active, 1); mux_redraw_active(*active, *rows, *cols); return 0;
-        case 'p': *active = switch_relative(*active, -1); mux_redraw_active(*active, *rows, *cols); return 0;
-        case 'r': mux_redraw_active(*active, *rows, *cols); return 0;
-        case '?': mux_help_line(); mux_status_bar(*rows, *cols, *active); return 0;
-        case 'q': return 1;
-        default:
-            if (c >= '0' && c <= '9') {
-                int idx = c - '0';
-                if (idx < MUX_MAX_SESSIONS && g_sessions[idx].used) {
-                    *active = idx;
-                    mux_redraw_active(*active, *rows, *cols);
-                }
-            }
-            return 0;
-    }
-}
-
 int main(int argc, char **argv) {
     if (argc >= 4 && strcmp(argv[1], MUX_BIND_ARG) == 0) {
-        return bind_and_exec(argv);
+        return mux_bind_and_exec(argv);
     }
     const char *prog = (argc > 1) ? argv[1] : "/bin/osh";
 
     int rows = 24, cols = 80;
     mux_get_size(&rows, &cols);
-    raw_on();
+    mux_raw_on();
     _onyx_write(1, MUX_ALT_ENTER MUX_CLEAR, strlen(MUX_ALT_ENTER MUX_CLEAR));
 
     if (mux_session_open("s1", prog, rows, cols) < 0) {
         _onyx_write(1, "mux: cannot open /dev/ptmx\r\n", 28);
-        raw_off();
+        mux_raw_off();
         return 1;
     }
     int active = 0;
@@ -177,7 +85,7 @@ int main(int argc, char **argv) {
                             mux_session_write(active, out, o);
                             o = 0;
                         }
-                        if (command(c, &active, &rows, &cols, prog)) {
+                        if (mux_command(c, &active, &rows, &cols, prog)) {
                             quit = 1;
                             break;
                         }
@@ -216,6 +124,6 @@ int main(int argc, char **argv) {
 
     mux_session_kill_all();
     _onyx_write(1, MUX_CLEAR MUX_ALT_LEAVE, strlen(MUX_CLEAR MUX_ALT_LEAVE));
-    raw_off();
+    mux_raw_off();
     return 0;
 }

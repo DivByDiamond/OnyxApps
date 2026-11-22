@@ -44,6 +44,7 @@ extern struct mux_session g_sessions[MUX_MAX_SESSIONS];
 
 /* session.c */
 int  mux_session_open(const char *title, const char *prog, int rows, int cols);
+int  mux_bind_and_exec(char **argv);
 int  mux_session_write(int idx, const char *buf, size_t len);
 int  mux_session_read(int idx, char *buf, size_t cap);
 void mux_session_resize_all(int rows, int cols);
@@ -53,6 +54,9 @@ void mux_session_replay(int idx);
 
 /* ui.c */
 void mux_get_size(int *rows, int *cols);
+void mux_raw_on(void);
+void mux_raw_off(void);
+int  mux_command(unsigned char c, int *active, int *rows, int *cols, const char *prog);
 void mux_status_bar(int rows, int cols, int active);
 void mux_help_line(void);
 void mux_redraw_active(int active, int rows, int cols);

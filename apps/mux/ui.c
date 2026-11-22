@@ -15,19 +15,28 @@
 #include <unistd.h>
 #include <termios.h>
 #include "mux.h"
+#include "../../lib/term/term.h"
+
+static struct termios g_orig;
+static int g_raw = 0;
+
+void mux_raw_on(void) {
+    if (term_raw_enable_nb(&g_orig)) g_raw = 1;
+}
+
+void mux_raw_off(void) {
+    if (g_raw) {
+        term_raw_restore(&g_orig);
+        g_raw = 0;
+    }
+}
 
 void mux_get_size(int *rows, int *cols) {
-    unsigned short ws[4];
-    ws[0] = 24;
-    ws[1] = 80;
-    ws[2] = 0;
-    ws[3] = 0;
     int r = 24, c = 80;
-    if (_onyx_ioctl(0, TIOCGWINSZ, (long)ws) == 0) {
-        if (ws[0] >= 4 && ws[1] >= 20) {
-            r = ws[0];
-            c = ws[1];
-        }
+    if (term_get_size(&r, &c)) {
+        if (r < 4 || c < 20) { r = 24; c = 80; }
+    } else {
+        r = 24; c = 80;
     }
     *rows = r;
     *cols = c;
@@ -89,4 +98,56 @@ void mux_help_line(void) {
 void mux_redraw_active(int active, int rows, int cols) {
     mux_session_replay(active);
     mux_status_bar(rows, cols, active);
+}
+
+static int session_count(void) {
+    int n = 0;
+    for (int i = 0; i < MUX_MAX_SESSIONS; i++) {
+        if (g_sessions[i].used) n++;
+    }
+    return n;
+}
+
+static int switch_relative(int active, int step) {
+    for (int k = 1; k <= MUX_MAX_SESSIONS; k++) {
+        int idx = (active + step * k + MUX_MAX_SESSIONS * 8) % MUX_MAX_SESSIONS;
+        if (g_sessions[idx].used) return idx;
+    }
+    return active;
+}
+
+/* One ^a command. Returns 1 when the multiplexer should quit. */
+int mux_command(unsigned char c, int *active, int *rows, int *cols,
+                const char *prog) {
+    switch (c) {
+        case 'c': {
+            char title[8];
+            int n = session_count() + 1;
+            title[0] = 's';
+            title[1] = (char)('0' + (n % 10));
+            title[2] = 0;
+            int idx = mux_session_open(title, prog, *rows, *cols);
+            if (idx < 0) {
+                mux_help_line();
+                return 0;
+            }
+            *active = idx;
+            mux_redraw_active(*active, *rows, *cols);
+            return 0;
+        }
+        case 'n': *active = switch_relative(*active, 1); mux_redraw_active(*active, *rows, *cols); return 0;
+        case 'p': *active = switch_relative(*active, -1); mux_redraw_active(*active, *rows, *cols); return 0;
+        case 'r': mux_redraw_active(*active, *rows, *cols); return 0;
+        case '?': mux_help_line(); mux_status_bar(*rows, *cols, *active); return 0;
+        case 'q': return 1;
+        default:
+            if (c >= '0' && c <= '9') {
+                int idx = c - '0';
+                if (idx < MUX_MAX_SESSIONS && g_sessions[idx].used) {
+                    *active = idx;
+                    mux_redraw_active(*active, *rows, *cols);
+                }
+            }
+            return 0;
+    }
 }

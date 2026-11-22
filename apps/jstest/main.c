@@ -1,7 +1,9 @@
 /*
  * main.c - program entry and the /dev/jsN read loop for jstest.
  *
- * Usage: jstest [/dev/jsN]     (default /dev/js0)
+ * Usage: jstest [-t SECS] [/dev/jsN]     (default /dev/js0)
+ * -t SECS makes the loop end cleanly after SECS seconds (scripted runs,
+ * the QEMU smoke test); without it the loop never ends.
  *
  * Opens the joydev-compatible node, drains the open-time init burst
  * and then prints one line per live event. An empty ring makes
@@ -15,22 +17,18 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "jstest.h"
 
-#define DEFAULT_DEVICE "/dev/js0"
 #define POLL_US 10000UL /* 10 ms retry after EAGAIN */
 #define LINE_CAP 48     /* longest line: "axis 255 = -32768 (init)" */
 
 static const char *const USAGE =
-    "usage: jstest [/dev/jsN]    print joystick events (default /dev/js0)\r\n"
+    "usage: jstest [-t SECS] [/dev/jsN]   print joystick events (default /dev/js0)\r\n"
+    "  -t SECS   exit 0 after SECS seconds (1..86400)\r\n"
     "exit codes: 0 clean, 2 usage, 3 device error\r\n";
-
-static int is_help(const char *arg) {
-    return strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0;
-}
 
 /* Report a hard failure on the device path; returns the exit code. */
 static int device_error(const char *what, const char *device) {
@@ -40,13 +38,18 @@ static int device_error(const char *what, const char *device) {
 }
 
 /* Open the node and loop: decode every 8-byte record, sleep through
- * EAGAIN, bail out on any other read failure. Never returns on the
- * happy path. */
-static int run(const char *device) {
+ * EAGAIN, bail out on any other read failure. Returns 0 only at the
+ * -t deadline; without -t it never returns on the happy path. */
+static int run(const char *device, unsigned int secs) {
     int fd = open(device, O_RDONLY, 0);
+    time_t deadline = time(NULL) + (time_t)secs;
 
     if (fd < 0) return device_error("open", device);
     for (;;) {
+        if (secs != 0 && time(NULL) >= deadline) {
+            close(fd);
+            return 0;
+        }
         unsigned char bytes[JS_REC_BYTES];
         long n = read(fd, bytes, JS_REC_BYTES);
 
@@ -72,13 +75,12 @@ static int run(const char *device) {
 }
 
 int main(int argc, char **argv) {
-    if (argc == 2 && is_help(argv[1])) {
+    struct js_opts opts;
+    int rc = js_parse_args(argc, argv, &opts);
+
+    if (rc != JS_ARGS_OK) {
         fputs(USAGE, stderr);
-        return 0;
+        return rc == JS_ARGS_HELP ? 0 : 2;
     }
-    if (argc > 2 || (argc == 2 && argv[1][0] == '-')) {
-        fputs(USAGE, stderr);
-        return 2;
-    }
-    return run((argc == 2) ? argv[1] : DEFAULT_DEVICE);
+    return run(opts.device, opts.secs);
 }

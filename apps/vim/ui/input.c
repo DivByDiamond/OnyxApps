@@ -1,5 +1,6 @@
 /* input.c - terminal raw mode, size query and key decoding. */
 #include "vim.h"
+#include "../../lib/term/term.h"
 
 /* ── Input ─────────────────────────────────────────────────────────── */
 unsigned char key_pushback;
@@ -56,26 +57,21 @@ int read_key(void) {
 
 /* ── Terminal ──────────────────────────────────────────────────────── */
 void raw_enable(void) {
-    struct termios t;
-    tcgetattr(0, &orig_tio);
-    t = orig_tio;
-    cfmakeraw_apply(&t);
-    tcsetattr(0, 0, &t);
-    raw_on = 1;
+    if (term_raw_enable(&orig_tio)) raw_on = 1;
 }
 
 void raw_disable(void) {
     if (raw_on) {
-        tcsetattr(0, 0, &orig_tio);
+        term_raw_restore(&orig_tio);
         raw_on = 0;
     }
 }
 
 void query_size(void) {
-    unsigned short ws[4] = {24, 80, 0, 0};
-    if (_onyx_ioctl(0, 0x5413, (long)ws) == 0 && ws[0] > 3 && ws[1] > 10) {
-        rows = ws[0];
-        cols = ws[1];
+    int r = rows, c = cols;
+    if (term_get_size(&r, &c) && r > 3 && c > 10) {
+        rows = r;
+        cols = c;
     }
     if (rows < 8) rows = 8;
     if (cols < 24) cols = 24;

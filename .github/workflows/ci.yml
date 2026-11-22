@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [vim, osnake, otop, mux, obrowse, jstest]
+        app: [vim, osnake, otop, mux, obrowse, jstest, otablet, ochat, ochat-gui]
     steps:
       - uses: actions/checkout@v6
 
@@ -41,7 +41,9 @@ jobs:
             echo "== $f"
             gcc -std=gnu11 -fsyntax-only \
               -Wno-error=incompatible-pointer-types \
-              -I"$INC/io" -I"$INC/core" -I"apps/${{ matrix.app }}" \
+              -I"$INC/io" -I"$INC/core" \
+              -I"apps/${{ matrix.app }}" \
+              -I"lib/ochat" -I"lib/oc2rpc" -I"apps/otablet" \
               "$f"
           done
 

@@ -13,7 +13,7 @@
 | ochat | wip | CLI-чат по радио OC2R (ORA-адреса): send/recv/shell/who/ping/status через RPC-шину `/dev/hvc0` (`lib/ochat`, `lib/oc2rpc`) | Живой прогон с модом; подтвердить формат ответов (`OnyxOS/docs/dev/ochat.md`), `listRadioDevices` |
 | ochat-gui | wip | GUI-чат (framebuffer+мышь, тулкит otablet): список устройств, сообщения, ввод, индикатор ping | Живой прогон в QEMU; логика покрыта host-тестами |
 | obrowse | done | TUI-браузер: стадии A–D (fetch → разбор HTML → список ссылок → навигация → overlay ошибок) | Живой сквозной прогон URL → DNS → TCP → GET → render → link → back (P1 N2 в `OnyxKernel/todo.md`) |
-| jstest | wip | Диагностика джойстика `/dev/jsN` (joydev-рекорды 8 байт: init-бёрст + live-события, EAGAIN → retry 10 мс); декод покрыт host-тестом `test_jstest` | Живой прогон в QEMU с HID-джойстиком (`/dev/js0` из OnyxKernel feat/usb-hid-joystick) |
+| jstest | done | Диагностика джойстика `/dev/jsN` (joydev-рекорды 8 байт: init-бёрст + live-события, EAGAIN → retry 10 мс, `-t SECS` — ограниченный прогон); декод и разбор аргументов покрыты host-тестом `test_jstest`; в CI-матрице сборки (`ci.yml`) и в `apps.list` образа | Живой прогон пройден 2026-11-22: `OnyxOS/scripts/qemu-jstest-smoke.sh` (qemu-xhci + usb-tablet, QMP input-send-event: init-бёрст, live оси/кнопки js0, чистый выход по `-t`). Не проверено: live-поток второго стика (см. `OnyxKernel/todo.md`, USB) |
 | ofetch | idea | Аналог fastfetch: ASCII-лого Onyx + версия ядра, uptime, память, CPU, hart'ы, разрешение фреймбуфера из `/proc` и `/dev/fb0` | — |
 | otree | idea | Дерево каталогов (`otree [path]`), рекурсивный readdir + box-drawing | — |
 | ocalc | idea | Инфиксный калькулятор `+-*/%` и скобки, `math.h` | — |
@@ -26,6 +26,27 @@
 - **Вынести в `lib/` общий слой терминала** (`lib/term`): raw-termios (вход/выход из raw, восстановление), разбор escape-последовательностей клавиш, запрос размера через `TIOCGWINSZ`. Сейчас это скопировано в vim, osnake, otop, obrowse, mux, ochat и ochat-gui; после выноса каждое приложение подключает общий код, правки делаются в одном месте.
 - **Вынести HTTP-клиент в `lib/`** (`lib/http`): сейчас он живёт только внутри `obrowse/net/fetch.c`; когда понадобится второй потребитель (например, `ofetch` или загрузчик), брать оттуда, а не писать заново.
 - Убрано: `dnstest` (отладочная заглушка на 17 строк), `ohttp` (дублировал HTTP-клиент obrowse, остался `obrowse/net/fetch.c`), `oed` (остался `vim`).
+
+## Аудит 2026-11-23 (структура / CI / сборка)
+
+Проверено: 11 приложений в `apps/` (`vim, lua, luac, mux, obrowse, ochat, ochat-gui, osnake, otablet, otop, jstest`) совпадают с матрицей `build` в `.github/workflows/ci.yml`.
+
+Исправлено:
+- `ci.yml` syntax-check матрица дополнена `otablet, ochat, ochat-gui` (раньше только 6 из 11); добавлены include-пути `lib/ochat`, `lib/oc2rpc`, `apps/otablet`, чтобы host-проверка проходила для чат-приложений.
+- `OnyxOS/scripts/build-apps.py`: `otablet` добавлен в `ROOT_APPS` (согласовано с `Makefile`; ранее locked-сборка собирала его в user ring, хотя он пишет в `/users`).
+- `Makefile`: `mux` добавлен в `ROOT_APPS` (раньше собирался в user ring, хотя владеет PTY-мастерами).
+- `apps/ochat-gui/device/screen.c`: `open("/dev/fb0", O_RDWR)` → `open(..., O_RDWR, 0)` (согласовано с `libonyxc`).
+- `OnyxCompiller/libonyxc/src/io/termios.c`: комментарий больше не ссылается на удалённые `oed`/`osysmon`.
+
+Выявлено (не исправлено, требует отдельной задачи):
+- HTTP-клиент живёт только в `obrowse/net/fetch.c` (`lib/http` при втором потребителе).
+- `build/` содержит устаревшие `oed.onx`/`ohttp.onx` (gitignored, безвредны, но мусор).
+
+Сделано в рамках аудита:
+- `lib/term/term.h` (header-only): `term_raw_enable`, `term_raw_enable_nb`, `term_raw_restore`, `term_get_size`. Мигрированы 7 приложений (vim, osnake, otop, obrowse, mux, ochat, ochat-gui) — raw-mode и TIOCGWINSZ больше не дублируются.
+- `apps/mux/main.c` разбит: 221 → 128 строк (helpers перенесены в `session.c`/`ui.c`).
+- `README.md` добавлены для `ochat` и `ochat-gui`.
+- `apps/ochat-gui/device/screen.c`: `open()` приведён к 3 аргументам.
 
 ## obrowse: честные ограничения ядра
 

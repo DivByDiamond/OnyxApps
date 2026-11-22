@@ -174,3 +174,22 @@ void mux_session_replay(int idx) {
         _onyx_write(1, s->replay, s->replay_len);
     }
 }
+
+/* Helper mode: mux --bind <pts-path> <program>.
+ *
+ * Binds the slave side to fds 0-2 and execs the session command. Runs in
+ * the spawned child, so the multiplexer itself never owns the child's
+ * address space or fd table. */
+int mux_bind_and_exec(char **argv) {
+    int s = (int)_onyx_open(argv[2], 2 /* O_RDWR */, 0);
+    if (s < 0) return 1;
+    _onyx_fcntl(s, 0x4f01 /* F_BIND_STDIO */, 0);
+    _onyx_fcntl(s, 0x4f01, 1);
+    _onyx_fcntl(s, 0x4f01, 2);
+    if (s > 2) _onyx_close(s);
+    char *cargv[2];
+    cargv[0] = argv[3];
+    cargv[1] = 0;
+    _onyx_exec(argv[3], cargv);
+    return 127;
+}

@@ -42,4 +42,18 @@ int js_decode(const unsigned char bytes[JS_REC_BYTES], struct js_event *ev);
  * Returns buf so callers can use it inline as an argument. */
 char *js_format(const struct js_event *ev, char *buf, size_t cap);
 
+/* Parsed command line. */
+struct js_opts {
+    const char *device;  /* node path; "/dev/js0" when not given */
+    unsigned int secs;   /* -t SECS: exit 0 after SECS seconds; 0 = never */
+};
+
+#define JS_ARGS_OK    0
+#define JS_ARGS_HELP  1 /* -h / --help */
+#define JS_ARGS_USAGE 2 /* malformed command line */
+
+/* Parse "[-t SECS] [/dev/jsN]" (any order, at most one device). SECS is
+ * a decimal 1..86400. Pure: no I/O, so it is host-tested too. */
+int js_parse_args(int argc, char **argv, struct js_opts *opts);
+
 #endif /* JSTEST_H */

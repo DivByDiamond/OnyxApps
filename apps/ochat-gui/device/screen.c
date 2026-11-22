@@ -2,6 +2,7 @@
  * Reuses the otablet screen geometry (centred integer scaling) and the same
  * mouse/framebuffer ABI as otablet/device/frontend.c. */
 #include "../gui/gui.h"
+#include "../../../lib/term/term.h"
 #include "device/display.h"
 #include "link/link.h"
 #include <stdio.h>
@@ -20,16 +21,9 @@ static struct termios saved_tio;
 static int raw_on;
 
 static void keyboard(int on) {
-    struct termios t;
     if (on && !raw_on) {
-        if (tcgetattr(0, &saved_tio) != 0) return;
-        t = saved_tio;
-        cfmakeraw_apply(&t);
-        t.c_cc[VMIN] = 0;
-        t.c_cc[VTIME] = 0;
-        tcsetattr(0, 0, &t);
-        raw_on = 1;
-    } else if (!on && raw_on) { tcsetattr(0, 0, &saved_tio); raw_on = 0; }
+        if (term_raw_enable_nb(&saved_tio)) raw_on = 1;
+    } else if (!on && raw_on) { term_raw_restore(&saved_tio); raw_on = 0; }
 }
 
 static int present(int fd, const struct ow_screen *s, int mx, int my) {
@@ -56,7 +50,7 @@ int screen_run(struct gui *g) {
     struct pointer p;
     int fd, x, y, i, down = 0, armed = 0, lastx = -1, lasty = -1, dirty = 1, rc = 0;
     unsigned char key;
-    fd = open("/dev/fb0", O_RDWR);
+    fd = open("/dev/fb0", O_RDWR, 0);
     if (fd < 0) return -1;
     if (_onyx_ioctl(fd, 0x4600, (long)&screen) < 0 || !ow_screen_valid(&screen)) { close(fd); return -1; }
     for (i = 0; i < (int)screen.width; i++)

@@ -6,6 +6,7 @@
  * frame loop without blocking. Arrow keys arrive as CSI sequences.
  */
 #include "osnake.h"
+#include "../../lib/term/term.h"
 
 int screen_rows = 24;
 int screen_cols = 80;
@@ -15,29 +16,22 @@ static struct termios orig_termios;
 static int raw_on = 0;
 
 void term_raw_on(void) {
-    struct termios t;
-    tcgetattr(0, &orig_termios);
-    t = orig_termios;
-    cfmakeraw_apply(&t);
-    t.c_cc[VMIN] = 0;
-    t.c_cc[VTIME] = 0;
-    tcsetattr(0, 0, &t);
-    raw_on = 1;
+    if (term_raw_enable_nb(&orig_termios)) raw_on = 1;
 }
 
 void term_raw_off(void) {
     if (raw_on) {
-        tcsetattr(0, 0, &orig_termios);
+        term_raw_restore(&orig_termios);
         raw_on = 0;
     }
 }
 
 /* Real framebuffer grid from TIOCGWINSZ (same probe as vim/otop). */
 void get_size(void) {
-    unsigned short ws[4] = {24, 80, 0, 0};
-    if (_onyx_ioctl(0, 0x5413, (long)ws) == 0 && ws[0] > 2 && ws[1] > 8) {
-        screen_rows = ws[0];
-        screen_cols = ws[1];
+    int r = screen_rows, c = screen_cols;
+    if (term_get_size(&r, &c) && r > 2 && c > 8) {
+        screen_rows = r;
+        screen_cols = c;
     }
     if (screen_rows < 5) screen_rows = 5;
     if (screen_cols < 20) screen_cols = 20;

@@ -17,6 +17,7 @@
 #include <termios.h>
 #include <errno.h>
 #include "obrowse.h"
+#include "../../lib/term/term.h"
 #define K_UP    1000
 #define K_DOWN  1001
 #define K_PGUP  1002
@@ -31,19 +32,13 @@ static int g_history_len = 0;
 static int g_top = 0;
 static char g_body_buf[OBROWSE_BUF]; /* .bss: USER_TOP proximity workaround */
 static void term_raw_on(void) {
-    struct termios t;
-    tcgetattr(0, &g_orig);
-    t = g_orig;
-    cfmakeraw_apply(&t);
-    t.c_cc[VMIN] = 0; t.c_cc[VTIME] = 0;
-    tcsetattr(0, 0, &t);
-    g_raw_on = 1;
+    if (term_raw_enable_nb(&g_orig)) g_raw_on = 1;
 }
-static void term_raw_off(void) { if (g_raw_on) { tcsetattr(0, 0, &g_orig); g_raw_on = 0; } }
+static void term_raw_off(void) { if (g_raw_on) { term_raw_restore(&g_orig); g_raw_on = 0; } }
 static void get_size(void) {
-    unsigned short ws[4] = {24, 80, 0, 0};
-    if (_onyx_ioctl(0, 0x5413, (long)ws) == 0 && ws[0] > 4 && ws[1] > 16) {
-        g_rows = ws[0]; g_cols = ws[1];
+    int r = g_rows, c = g_cols;
+    if (term_get_size(&r, &c) && r > 4 && c > 16) {
+        g_rows = r; g_cols = c;
     }
     if (g_rows < 8) g_rows = 8;
     if (g_cols < 32) g_cols = 32;

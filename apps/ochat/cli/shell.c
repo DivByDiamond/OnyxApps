@@ -1,5 +1,6 @@
 /* shell.c - interactive line chat: raw terminal, incoming messages shown live. */
 #include "cli.h"
+#include "../../lib/term/term.h"
 #include <termios.h>
 #include <unistd.h>
 
@@ -16,17 +17,10 @@ static struct ochat_line line;
 static struct ochat_msg inbox[OCHAT_MAX_POLL];
 
 static void raw(int on) {
-    struct termios t;
     if (on && !raw_on) {
-        if (tcgetattr(0, &saved_tio) != 0) return;
-        t = saved_tio;
-        cfmakeraw_apply(&t);
-        t.c_cc[VMIN] = 0;
-        t.c_cc[VTIME] = 0;
-        tcsetattr(0, 0, &t);
-        raw_on = 1;
+        if (term_raw_enable_nb(&saved_tio)) raw_on = 1;
     } else if (!on && raw_on) {
-        tcsetattr(0, 0, &saved_tio);
+        term_raw_restore(&saved_tio);
         raw_on = 0;
     }
 }

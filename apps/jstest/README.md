@@ -25,6 +25,7 @@ make jstest                # from the repo root (onyxcc in PATH or ONYXCC=...)
 ```sh
 jstest               # read /dev/js0, the first joystick
 jstest /dev/js1      # read a specific node
+jstest -t 10         # exit 0 after 10 seconds (scripted runs, smoke test)
 ```
 
 Output lines (init records from the open-time burst are marked):
@@ -36,8 +37,8 @@ button 5 down
 button 5 up (init)
 ```
 
-Exit codes: `0` clean exit (`--help`; the event loop itself never
-ends), `2` usage error, `3` device error (open failure or a
+Exit codes: `0` clean exit (`--help` or the `-t SECS` deadline; without
+`-t` the event loop never ends), `2` usage error, `3` device error (open failure or a
 non-EAGAIN read). An empty event ring makes `read()` fail with
 `EAGAIN`; the loop then sleeps 10 ms and retries.
 
@@ -61,8 +62,8 @@ make -C tests/native test      # includes test_jstest
 Covered: the exact wire decode (little-endian time/value, i16 sign),
 button and axis records, the init bit in both, the one-line output
 format, rejection of unknown type bits. The live read loop (open,
-EAGAIN retry) needs a real OnyxOS with a joystick attached: verify
-manually in QEMU.
+EAGAIN retry) is verified live by `OnyxOS/scripts/qemu-jstest-smoke.sh`
+(QEMU xHCI + usb-tablet, input injected over QMP).
 
 ## Project structure
 

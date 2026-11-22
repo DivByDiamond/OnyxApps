@@ -19,7 +19,7 @@ APPS   := $(notdir $(wildcard apps/*))
 ROOT_CUSTOM_APPS := lua luac
 # otablet persists notes under /users, and the kernel only lets ring 1 create
 # files; build it as a root-ring system app like osh and login.
-ROOT_APPS := otablet
+ROOT_APPS := otablet mux
 CUSTOM_APPS := $(notdir $(patsubst %/build.py,%,$(wildcard apps/*/build.py)))
 C_APPS := $(filter-out $(CUSTOM_APPS),$(APPS))
 

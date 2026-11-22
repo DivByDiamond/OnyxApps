@@ -123,6 +123,38 @@ static void test_bad_type(void) {
     CHECK(js_decode(b, &ev) == -1);
 }
 
+static void test_args(void) {
+    struct js_opts o;
+    char *none[] = {"jstest"};
+    char *dev[] = {"jstest", "/dev/js2"};
+    char *timed[] = {"jstest", "-t", "5", "/dev/js1"};
+    char *timed_first[] = {"jstest", "/dev/js3", "-t", "30"};
+    char *help[] = {"jstest", "--help"};
+    char *no_secs[] = {"jstest", "-t"};
+    char *zero[] = {"jstest", "-t", "0"};
+    char *junk[] = {"jstest", "-t", "5x"};
+    char *huge[] = {"jstest", "-t", "86401"};
+    char *two_dev[] = {"jstest", "/dev/js0", "/dev/js1"};
+    char *unknown[] = {"jstest", "-x"};
+
+    printf("argument parsing:\n");
+    CHECK(js_parse_args(1, none, &o) == JS_ARGS_OK);
+    CHECK(strcmp(o.device, "/dev/js0") == 0 && o.secs == 0);
+    CHECK(js_parse_args(2, dev, &o) == JS_ARGS_OK);
+    CHECK(strcmp(o.device, "/dev/js2") == 0 && o.secs == 0);
+    CHECK(js_parse_args(4, timed, &o) == JS_ARGS_OK);
+    CHECK(strcmp(o.device, "/dev/js1") == 0 && o.secs == 5);
+    CHECK(js_parse_args(4, timed_first, &o) == JS_ARGS_OK);
+    CHECK(strcmp(o.device, "/dev/js3") == 0 && o.secs == 30);
+    CHECK(js_parse_args(2, help, &o) == JS_ARGS_HELP);
+    CHECK(js_parse_args(2, no_secs, &o) == JS_ARGS_USAGE);
+    CHECK(js_parse_args(3, zero, &o) == JS_ARGS_USAGE);
+    CHECK(js_parse_args(3, junk, &o) == JS_ARGS_USAGE);
+    CHECK(js_parse_args(3, huge, &o) == JS_ARGS_USAGE);
+    CHECK(js_parse_args(3, two_dev, &o) == JS_ARGS_USAGE);
+    CHECK(js_parse_args(2, unknown, &o) == JS_ARGS_USAGE);
+}
+
 int main(void) {
     test_axis_decode();
     test_axis_init();
@@ -130,6 +162,7 @@ int main(void) {
     test_button_init_up();
     test_negative_value();
     test_bad_type();
+    test_args();
     printf("\ntest_jstest: %d checks, %d failures\n", checks, failures);
     return failures > 0;
 }
